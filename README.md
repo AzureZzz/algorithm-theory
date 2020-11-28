@@ -16,13 +16,43 @@ Three algorithms of large integer multiplication are implemented in C++ programm
 - Multiply based on Divide and conquer.
 - Multiply based on Improved  Divide and conquer.
 
+
+
 ### 2.Methods
 
-TODO
+**Vanilla**
+
+Algorithmic complexity：$$ O(n^2) $$
+
+**Divide and Conquer**
+$$
+\begin{aligned}
+Input:&X,Y\\
+Compute:&Z=X*Y\\
+Divide:&X=A*10^n+B,Y=C*10^n+D\\\\
+Z=&X*Y\\
+=&(A*10^n+B)*(C*10^n+D)\\
+=&AC*10^{2n}+(AD+BC)*10^n+BD\ \ \ \ \ \ \ \ \ \ \ \ \ \ (1)
+\end{aligned}
+$$
+Algorithmic complexity：$$ O(n^2) $$
 
 
 
-### 4.Experimental results 
+**Improved  Divide and conquer**
+$$
+\begin{aligned}
+Z=&AC*10^{2n}+(AD+BC)*10^n+BD\\
+=&AC*10^{2n}+[(A+B)(C+D)-AC-BD]*10^n+BD\ \ \ \ \ \ \ \ \ \ \ \ \ \ (2)
+\end{aligned}
+$$
+By converting formula (1) to formula (2), one multiplication is eliminated.
+
+Algorithmic complexity：O(nlog(n))
+
+
+
+### 3.Experimental results 
 
 Runtime environments:
 
