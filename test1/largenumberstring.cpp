@@ -99,7 +99,7 @@ public:
 			res = res.substr(1, res.length());
 		return res;
 	}
-
+	
 	string DACMultiply(string x, string y)
 	{
 		int m = x.length(), n = y.length();
