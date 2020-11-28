@@ -59,17 +59,14 @@ void readKeyword(string filename)
 		{
 			continue;
 		}
-		//cout << token << ":" << endl;
 		int index = atoi(token), temp;
 		token = strtok(NULL, seps);
 		while (token != NULL)
 		{
-			//cout << token << ",";
 			temp = atoi(token);
 			key[index].push_back(temp);
 			token = strtok(NULL, seps);
 		}
-		//cout << endl;
 	}
 	fclose(file);
 }
