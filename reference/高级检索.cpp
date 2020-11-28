@@ -556,17 +556,7 @@ int main()
 	string keyfile = "../data/Yago/node_keywords.txt";
 	string graphfile = "../data/Yago/edge.txt";
 	string sitefile = "../data/placeid2coordYagoVB.txt";
-
-	/*
-	string keyfile = "B:/算法大作业/Yago_small/node_keywords.txt";
-	string graphfile = "B:/算法大作业/Yago_small/edge.txt";
-	string sitefile = "B:/算法大作业/数据/placeid2coordYagoVB.txt";
-	*/
-	/*
-	string keyfile = "B:/算法大作业/question1/node_kewords.txt";
-	string graphfile = "B:/算法大作业/question1/edge.txt";
-	string sitefile = "B:/算法大作业/question1/position.txt";
-	*/
+	
 	PreSet();
 	ReadKey(keyfile);
 	ReadGraph(graphfile);

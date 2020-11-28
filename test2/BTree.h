@@ -72,6 +72,7 @@ typedef enum status{
 	OVERFLOW,
 	EMPTY
 }Status;
+
 #pragma region B树方法声明 
 //	初始化B树 
 Status InitBTree(BTree &t)
@@ -645,7 +646,6 @@ void Test1()
 	PrintBTree(t);
 	
 }
-
 
 void Test2()
 {
