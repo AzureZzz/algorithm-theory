@@ -147,17 +147,25 @@ void readSite(string filename)
 	sitenum = site.size();
 	fclose(file);
 }
+
 void show()
 {
+	int num_edge = 0;
 	for (int i = 0; i < pnum; i++)
 	{
-		cout << i << ": ";
-		for (int j = 0; j < (int)graph[i].size(); j++)
+		if((int)graph[i].size()>0)
 		{
-			cout << graph[i][j] << ",";
+			// cout << i << ": ";
+			for (int j = 0; j < (int)graph[i].size(); j++)
+			{
+				// cout << graph[i][j] << ",";
+				num_edge++;
+			}
+			// cout << endl;				
 		}
-		cout << endl;
 	}
+	cout<<endl;
+	cout<<"Edges:"<<num_edge<<endl;
 }
 #pragma endregion
 
@@ -166,7 +174,9 @@ int main()
     string path_keyword = "../data/Yago_small/node_keywords.txt";
 	string path_graph = "../data/Yago_small/edge.txt";
 	string path_site = "../data/placeid2coordYagoVB.txt";
+
+	preset();
 	readGraph(path_graph);
-	// show();
+	show();
     return 0;
 }
