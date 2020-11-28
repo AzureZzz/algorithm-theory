@@ -38,6 +38,7 @@ TODO
 ### 2.Dataset
 
 Used datasets：Yago，Yago_small.
+
 The datasets can be download by link: https://pan.baidu.com/s/103ohzftpLh284ZZ--wNufg  password: fw5m
 
 ### 3.Methods
