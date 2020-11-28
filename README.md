@@ -8,7 +8,7 @@ This project mainly consists of two experiments：
 
 
 ## Test1
-***
+
 ### 1.Main work
 
 Three algorithms of large integer multiplication are implemented in C++ programming language, including:
@@ -47,7 +47,6 @@ Runtime environments:
 
 
 ## Test2
-***
 
 ### 1.Main work
 
