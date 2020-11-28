@@ -7,7 +7,10 @@ This project mainly consists of two experiments：
 - Test2: Semantic location SKYLINE queries based on RDF graphs.
 
 
+
 ## Test1
+
+
 
 ### 1.Main work
 
@@ -56,12 +59,12 @@ Algorithmic complexity：O(nlog(n))
 
 Runtime environments:
 
-- CPU：Intel(R) Core(TM) i7-9750H CPU @ 2.60 GHz x 12  cores：6
-- RAM：2*8G, DDR4 2667Mhz 64bit
-- Disk：1TB SSD PCI-E
-- OS：Windows 10 (x64)
-- Compiler：g++(tdm-1) 5.1.0
-- IDE：Visual Studio Code
+> - **CPU**：Intel(R) Core(TM) i7-9750H CPU @ 2.60 GHz x 12  cores：6
+> - **RAM**：2*8G, DDR4 2667Mhz 64bit
+> - **Disk**：1TB SSD PCI-E
+> - **OS**：Windows 10 (x64)
+> - **Compiler**：g++(tdm-1) 5.1.0
+> - **IDE**：Visual Studio Code
 
 
 
@@ -74,19 +77,24 @@ Runtime environments:
 |         100000         |   98789.7    |  102907  |      6370.87      |
 |        1000000         |   10190900   | 10302800 |      221665       |
 |        10000000        |      -       |    -     |      8873400      |
+|       100000000        |      -       |    -     |     351386600     |
 
 
 
 
 ## Test2
 
+
+
 ### 1.Main work
 
 TODO
 
-### 2.Dataset
 
-Used datasets：Yago，Yago_small.
+
+### 2.Data
+
+Used data：*Yago*，*Yago_small*.
 
 The datasets can be download by link: https://pan.baidu.com/s/103ohzftpLh284ZZ--wNufg  password: fw5m
 
@@ -94,55 +102,47 @@ The data contains the following three files：
 
 - **edge.txt**
 
-​	It stores a linked list of directed graph adjacencies, with each row representing a vertex and its adjacent vertex.
-
-​	For example, 8:6291031,5330605,6481451,6280292, which means vertex 8 have four adjacent vertices, and they are 6291031,5330605,6481451,6280292.
+> It stores a linked list of directed graph adjacencies, with each row representing a vertex and its adjacent vertex.
+>
+> For example, 8:6291031,5330605,6481451,6280292, which means vertex 8 have four adjacent vertices, and they are 6291031,5330605,6481451,6280292.
 
 - **node_keywords.txt**
 
-​	It holds the text properties of the vertices, and each row represents the text properties of one vertex.
-
-​	For example, 0:8973992,10029808,8435980, which means vertex 0 have three keywords, and they are 8973992,10029808,8435980.
+> It holds the text properties of the vertices, and each row represents the text properties of one vertex.
+>
+> For example, 0:8973992,10029808,8435980, which means vertex 0 have three keywords, and they are 8973992,10029808,8435980.
 
 - **placeid2coordYagoVB.txt**
 
+> TODO
 
+*Yago* is a large scale graph, which contains **8,091,179** vertices and **50,415,307** edges.
 
-Yago is a large scale graph, which contains **8,091,179** vertices and **50,415,307** edges.
-
-Yago_small is a small scale graph, which contains **95,883** edges.
-<<<<<<< HEAD
-
-
-
-### 3.Skyline Introduce
+*Yago_small* is a small scale graph, which contains **95,883** edges.
 
 
 
 
 
-
-
-### 4.Methods
-
-
-=======
->>>>>>> ff8a66e7a46dcd2f3a1d478445379412f920000d
+### 3.Methods
 
 
 
 
 
-### 5.Experimental results 
+
+
+
+### 4.Experimental results 
 
 Runtime environments:
 
-- CPU：Intel(R) Xeon(R) Silver 4110 CPU @ 2.10GHz × 32  cores：8
-- RAM：2*32G, DDR4 2400Mhz 64bit
-- Disk：512GB SSD PCI-E
-- OS：Ubuntu 20.04 STL (x64)
-- Compiler：g++ 9.3.0
-- Debug：GUN gdb 9.2
-- IDE：Visual Studio Code
+> - **CPU**：Intel(R) Xeon(R) Silver 4110 CPU @ 2.10GHz × 32  cores：8
+> - **RAM**：2*32G, DDR4 2400Mhz 64bit
+> - **Disk**：512GB SSD PCI-E
+> - **OS**：Ubuntu 20.04 STL (x64)
+> - **Compiler**：g++ 9.3.0
+> - **Debug**：GUN gdb 9.2
+> - **IDE**：Visual Studio Code
 
 TODO
