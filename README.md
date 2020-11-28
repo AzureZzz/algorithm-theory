@@ -60,6 +60,8 @@ Runtime environments:
 - RAM：2*8G, DDR4 2667Mhz 64bit
 - Disk：1TB SSD PCI-E
 - OS：Windows 10 (x64)
+- Compiler：g++(tdm-1) 5.1.0
+- IDE：Visual Studio Code
 
 
 
@@ -100,5 +102,8 @@ Runtime environments:
 - RAM：2*32G, DDR4 2400Mhz 64bit
 - Disk：512GB SSD PCI-E
 - OS：Ubuntu 20.04 STL (x64)
+- Compiler：g++ 9.3.0
+- Debug：GUN gdb 9.2
+- IDE：Visual Studio Code
 
 TODO
