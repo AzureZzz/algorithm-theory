@@ -110,7 +110,7 @@ The data contains the following three files：
 
 Yago is a large scale graph, which contains **8,091,179** vertices and **50,415,307** edges.
 
-Yago_small is a small scale graph, which contains **95883** edges.
+Yago_small is a small scale graph, which contains **95,883** edges.
 
 
 
