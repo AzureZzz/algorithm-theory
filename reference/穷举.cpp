@@ -8,21 +8,21 @@
 #include<ctime>
 using namespace std;
 struct Node {
-	string name;			//½áµãÃû³Æ´æ·Å
-	vector<string> key;		//¹Ø¼ü´Ê´æ·Å
+	string name;			//ç»“ç‚¹åç§°å­˜æ”¾
+	vector<string> key;		//å…³é”®è¯å­˜æ”¾
 	Node(string n=""):name(n){}
 };
-static vector<Node> node;			//µãÀàĞÅÏ¢´æ´¢
-static int pnum = 8091179;//8091179,24;			//µãµÄÊıÄ¿
-static vector<int> *key;			//¹Ø¼ü´ÊĞÅÏ¢´æ´¢
-static vector<int> *graph;			//ÁÚ½Ó±í´æ´¢
-static vector<int> site;			//µØµãĞòºÅ´æ´¢
-static int dnum = 0;				//²éÑ¯¹Ø¼ü´ÊÊıÄ¿
+static vector<Node> node;			//ç‚¹ç±»ä¿¡æ¯å­˜å‚¨
+static int pnum = 8091179;//8091179,24;			//ç‚¹çš„æ•°ç›®
+static vector<int> *key;			//å…³é”®è¯ä¿¡æ¯å­˜å‚¨
+static vector<int> *graph;			//é‚»æ¥è¡¨å­˜å‚¨
+static vector<int> site;			//åœ°ç‚¹åºå·å­˜å‚¨
+static int dnum = 0;				//æŸ¥è¯¢å…³é”®è¯æ•°ç›®
 static int sitenum = 0;
 static int **gap;
-static int *cengshu;				//¼ÇÂ¼Ã¿¸öµãµÄ²ãÊı 
-static int maxlayer = 0x3f3f3f3f;	//¼ÇÂ¼Ö§ÅäÇé¿öÏÂµÄ×î¸ß²ã 
-#pragma region ¶ÁÈ¡Êı¾İ
+static int *cengshu;				//è®°å½•æ¯ä¸ªç‚¹çš„å±‚æ•° 
+static int maxlayer = 0x3f3f3f3f;	//è®°å½•æ”¯é…æƒ…å†µä¸‹çš„æœ€é«˜å±‚ 
+#pragma region è¯»å–æ•°æ®
 void PreSet()
 {
 	key = new vector<int>[pnum];
@@ -36,7 +36,7 @@ void ReadKey(string filename)
 	file = fopen(filename.c_str(), "r");
 	if (!file)
 	{
-		cout << "keyÎÄ¼ş´ò¿ªÊ§°Ü" << endl;
+		cout << "keyæ–‡ä»¶æ‰“å¼€å¤±è´¥" << endl;
 		exit(-1);
 	}
 	while (1)
@@ -74,7 +74,7 @@ void ReadGraph(string filename)
 	file = fopen(filename.c_str(), "r");
 	if (!file)
 	{
-		cout << "graphÎÄ¼ş´ò¿ªÊ§°Ü" << endl;
+		cout << "graphæ–‡ä»¶æ‰“å¼€å¤±è´¥" << endl;
 		exit(-1);
 	}
 	int u, v;
@@ -110,7 +110,7 @@ void ReadSite(string filename)
 	file = fopen(filename.c_str(), "r");
 	if (!file)
 	{
-		cout << "siteÎÄ¼ş´ò¿ªÊ§°Ü" << endl;
+		cout << "siteæ–‡ä»¶æ‰“å¼€å¤±è´¥" << endl;
 		exit(-1);
 	}
 	fscanf(file, "%d#\n", &sitenum);
@@ -153,8 +153,8 @@ void Show()
 }
 #pragma endregion
 
-#pragma region »ñÈ¡×î¶Ì¾àÀëĞÅÏ¢²¢±£ÁôÔÚgapfileÎÄ¼şÖĞ
-//¼ÆËã×î¶Ì¾àÀë£¨BFS±éÀú²ãÊı£©
+#pragma region è·å–æœ€çŸ­è·ç¦»ä¿¡æ¯å¹¶ä¿ç•™åœ¨gapfileæ–‡ä»¶ä¸­
+//è®¡ç®—æœ€çŸ­è·ç¦»ï¼ˆBFSéå†å±‚æ•°ï¼‰
 static int *visited;
 void BFS_CalculateMinDistance(int x, int start, vector<int> des)
 {
@@ -168,7 +168,7 @@ void BFS_CalculateMinDistance(int x, int start, vector<int> des)
 	while (!que.empty())
 	{
 		/* 
-		//¼ôÖ¦ 
+		//å‰ªæ 
 		if(layer>maxlayer)
 		{
 			return;
@@ -195,7 +195,7 @@ void BFS_CalculateMinDistance(int x, int start, vector<int> des)
 		for (int j = 0; j < (int)graph[u].size(); j++)
 		{
 			v = graph[u][j];
-			if (!visited[v])	//Î´·ÃÎÊ¹ı
+			if (!visited[v])	//æœªè®¿é—®è¿‡
 			{
 				que.push(v);
 				//cout << "v = " << v << endl;
@@ -203,7 +203,7 @@ void BFS_CalculateMinDistance(int x, int start, vector<int> des)
 				nextnodeNum++;
 			}
 		}
-		nodeNum--;	//Ã¿´ÎÑ­»·Êä³öÒ»¸öµã£¬¼´±éÀúµ±Ç°²ã½áµãÊı-1
+		nodeNum--;	//æ¯æ¬¡å¾ªç¯è¾“å‡ºä¸€ä¸ªç‚¹ï¼Œå³éå†å½“å‰å±‚ç»“ç‚¹æ•°-1
 		if (nodeNum == 0)
 		{
 			layer++;
@@ -246,12 +246,12 @@ void GetMinDistanceFile(vector<int> des, int times = 1000)
 		}
 	}
 	/*
-	//¾ßÓĞÓÅ»¯¼ôÖ¦Ë¼Ïë 
+	//å…·æœ‰ä¼˜åŒ–å‰ªææ€æƒ³ 
 	for (int j = 0; j < sitenum/2; j++)
 	{
 		BFS_CalculateMinDistance(j, site[j], des);
 		
-		//¼ôÖ¦ÓÅ»¯ 
+		//å‰ªæä¼˜åŒ– 
 		int temp = gap[j][0];
 		for(int k = 1; k < dnum; k++)
 		{
@@ -279,8 +279,8 @@ void GetMinDistanceFile(vector<int> des, int times = 1000)
 
 #pragma endregion
 
-#pragma region skyline²éÑ¯Ëã·¨Ò»£ºBNLËã·¨
-//·µ»ØÖµËµÃ÷£º1±íÊ¾a<b£¬-1±íÊ¾b<a£¬0±íÊ¾Á½ÕßÃ»ÓĞÖ§Åä¹ØÏµ
+#pragma region skylineæŸ¥è¯¢ç®—æ³•ä¸€ï¼šBNLç®—æ³•
+//è¿”å›å€¼è¯´æ˜ï¼š1è¡¨ç¤ºa<bï¼Œ-1è¡¨ç¤ºb<aï¼Œ0è¡¨ç¤ºä¸¤è€…æ²¡æœ‰æ”¯é…å…³ç³»
 int isGovern(int *a, int *b)
 {
 	int ag = 0, bg = 0;
@@ -336,7 +336,7 @@ void BNL()
 	for (int i = 0; i < sitenum; i++)
 	{
 		bool isSP = true;
-		//ĞÂÒıÈë½ÚµãÓë´°¿Ú½ÚµãÖ®¼äµÄ¶Ô±È
+		//æ–°å¼•å…¥èŠ‚ç‚¹ä¸çª—å£èŠ‚ç‚¹ä¹‹é—´çš„å¯¹æ¯”
 		if(!isAssessible(gap[i]))
 		{
 			continue;
@@ -374,19 +374,19 @@ void BNL()
 int main()
 {
 	/*
-	string keyfile = "B:\\Ëã·¨´ó×÷Òµ\\Yago\\node_keywords.txt";
-	string graphfile = "B:\\Ëã·¨´ó×÷Òµ\\Yago\\edge.txt";
-	string sitefile = "B:\\Ëã·¨´ó×÷Òµ\\Êı¾İ\\placeid2coordYagoVB.txt";
+	string keyfile = "B:\\ç®—æ³•å¤§ä½œä¸š\\Yago\\node_keywords.txt";
+	string graphfile = "B:\\ç®—æ³•å¤§ä½œä¸š\\Yago\\edge.txt";
+	string sitefile = "B:\\ç®—æ³•å¤§ä½œä¸š\\æ•°æ®\\placeid2coordYagoVB.txt";
 	*/
 	
-	string keyfile = "B:\\Ëã·¨´ó×÷Òµ\\Yago_small\\node_keywords.txt";
-	string graphfile = "B:\\Ëã·¨´ó×÷Òµ\\Yago_small\\edge.txt";
-	string sitefile = "B:\\Ëã·¨´ó×÷Òµ\\Êı¾İ\\placeid2coordYagoVB.txt";
+	string keyfile = "B:\\ç®—æ³•å¤§ä½œä¸š\\Yago_small\\node_keywords.txt";
+	string graphfile = "B:\\ç®—æ³•å¤§ä½œä¸š\\Yago_small\\edge.txt";
+	string sitefile = "B:\\ç®—æ³•å¤§ä½œä¸š\\æ•°æ®\\placeid2coordYagoVB.txt";
 	
 	/*
-	string keyfile = "B:\\Ëã·¨´ó×÷Òµ\\question1\\node_kewords.txt";
-	string graphfile = "B:\\Ëã·¨´ó×÷Òµ\\question1\\edge.txt";
-	string sitefile = "B:\\Ëã·¨´ó×÷Òµ\\question1\\position.txt";
+	string keyfile = "B:\\ç®—æ³•å¤§ä½œä¸š\\question1\\node_kewords.txt";
+	string graphfile = "B:\\ç®—æ³•å¤§ä½œä¸š\\question1\\edge.txt";
+	string sitefile = "B:\\ç®—æ³•å¤§ä½œä¸š\\question1\\position.txt";
 	*/
 	double starttime, endtime, deltatime;
 	PreSet();
@@ -394,9 +394,9 @@ int main()
 	ReadGraph(graphfile);
 	ReadSite(sitefile);
 	vector<int> des;
-	cout <<"¶¥µãÊıÄ¿ÊÇ£º"<< pnum << endl;
+	cout <<"é¡¶ç‚¹æ•°ç›®æ˜¯ï¼š"<< pnum << endl;
 	//Show();
-	cout << "Çë¸æËßÄãµÄ¼ìË÷Ä¿±êÊÇ(ÓÃ¿Õ¸ñ¸ô¿ª£¬»Ø³µ±íÊ¾¿ªÊ¼½øĞĞ¼ìË÷)£º" << endl;
+	cout << "è¯·å‘Šè¯‰ä½ çš„æ£€ç´¢ç›®æ ‡æ˜¯(ç”¨ç©ºæ ¼éš”å¼€ï¼Œå›è½¦è¡¨ç¤ºå¼€å§‹è¿›è¡Œæ£€ç´¢)ï¼š" << endl;
 	char tempstr[2048];
 	cin.getline(tempstr, 2048);
 	char seps[] = " ,";
@@ -424,21 +424,21 @@ int main()
 	}
 	*/
 	endtime = clock();
-	cout << "****************¹Ø¼ü´Ê¾àÀë¼ÆËãÍê±Ï£¡******************" << endl;
-	cout << "¾àÀë¼ÆËãµÄÊ±¼ä£º" << endtime - starttime << endl;
+	cout << "****************å…³é”®è¯è·ç¦»è®¡ç®—å®Œæ¯•ï¼******************" << endl;
+	cout << "è·ç¦»è®¡ç®—çš„æ—¶é—´ï¼š" << endtime - starttime << endl;
 	BNL();
-	cout << "****************BNL²éÑ¯½á¹ûÈçÏÂËùÊ¾******************" << endl;
+	cout << "****************BNLæŸ¥è¯¢ç»“æœå¦‚ä¸‹æ‰€ç¤º******************" << endl;
 	for (int i = 0; i < (int)BNLresult.size(); i++)
 	{
 		int sp = site[BNLresult[i]];
-		cout << "µÚ" << i + 1 << "¸öSPµãÊÇ" << sp << endl;
-		cout << "¹Ø¼ü´Ê" << endl;
+		cout << "ç¬¬" << i + 1 << "ä¸ªSPç‚¹æ˜¯" << sp << endl;
+		cout << "å…³é”®è¯" << endl;
 		for (int j = 0; j < (int)key[sp].size(); j++)
 		{
 			cout << key[sp][j] << " ";
 		}
 		cout << endl;
-		cout << "¾àÀë" << endl;
+		cout << "è·ç¦»" << endl;
 		for (int j = 0; j < dnum; j++)
 		{
 			cout << gap[BNLresult[i]][j] << " ";
@@ -447,7 +447,7 @@ int main()
 	}
 	endtime = clock();
 	deltatime = endtime - starttime;
-	cout << "Æ½¾ù×Ü²éÑ¯Ê±¼ä£º" << deltatime << endl;
+	cout << "å¹³å‡æ€»æŸ¥è¯¢æ—¶é—´ï¼š" << deltatime << endl;
 	//Show();
 	/*
 	for (int i = 0; i < (int)site.size(); i++)
@@ -464,3 +464,4 @@ int main()
 	
 	return 0;
 }
+
