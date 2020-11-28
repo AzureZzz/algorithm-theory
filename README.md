@@ -90,6 +90,32 @@ Used datasets：Yago，Yago_small.
 
 The datasets can be download by link: https://pan.baidu.com/s/103ohzftpLh284ZZ--wNufg  password: fw5m
 
+The data contains the following three files：
+
+- **edge.txt**
+
+​	It stores a linked list of directed graph adjacencies, with each row representing a vertex and its adjacent vertex.
+
+​	For example, 8:6291031,5330605,6481451,6280292, which means vertex 8 have four adjacent vertices, and they are 6291031,5330605,6481451,6280292.
+
+- **node_keywords.txt**
+
+​	It holds the text properties of the vertices, and each row represents the text properties of one vertex.
+
+​	For example, 0:8973992,10029808,8435980, which means vertex 0 have three keywords, and they are 8973992,10029808,8435980.
+
+- **placeid2coordYagoVB.txt**
+
+
+
+
+
+Yago is a large scale graph, which contains **8,091,179** vertices and **50,415,307** edges.
+
+Yago_small is a small scale graph.
+
+
+
 ### 3.Methods
 
 TODO
