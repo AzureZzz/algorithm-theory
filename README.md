@@ -88,7 +88,9 @@ Runtime environments:
 
 ### 1.Main work
 
-TODO
+Problem description：
+
+https://github.com/AzureZzz/algorithm-theory/blob/master/test2/Skyline.docx
 
 
 
@@ -104,17 +106,19 @@ The data contains the following three files：
 
 > It stores a linked list of directed graph adjacencies, with each row representing a vertex and its adjacent vertex.
 >
-> For example, 8:6291031,5330605,6481451,6280292, which means vertex 8 have four adjacent vertices, and they are 6291031,5330605,6481451,6280292.
+> eg：8:6291031,5330605,6481451,6280292, which means vertex 8 have four adjacent vertices, and they are 6291031,5330605,6481451,6280292.
 
 - **node_keywords.txt**
 
 > It holds the text properties of the vertices, and each row represents the text properties of one vertex.
 >
-> For example, 0:8973992,10029808,8435980, which means vertex 0 have three keywords, and they are 8973992,10029808,8435980.
+> eg： 0:8973992,10029808,8435980, which means vertex 0 have three keywords, and they are 8973992,10029808,8435980.
 
 - **placeid2coordYagoVB.txt**
 
-> TODO
+> It contains **4,774,796 ** vertices representing sites and their spatial coordinates.
+>
+> eg：0: 33.84833 35.58278, which means vertex 0 is a site and its spatial coordinates are 33.84833 35.58278.
 
 *Yago* is a large scale graph, which contains **8,091,179** vertices and **50,415,307** edges.
 
@@ -126,7 +130,9 @@ The data contains the following three files：
 
 ### 3.Methods
 
+**B-tree**
 
+reference：https://www.cnblogs.com/lianzhilei/p/11250589.html
 
 
 
