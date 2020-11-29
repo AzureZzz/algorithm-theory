@@ -94,6 +94,8 @@ https://github.com/AzureZzz/algorithm-theory/blob/master/test2/Skyline.docx
 
 or
 
+https://github.com/AzureZzz/algorithm-theory/blob/master/test2/RDF-skyline.pdf
+
 
 
 
