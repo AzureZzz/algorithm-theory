@@ -92,6 +92,10 @@ Problem description：
 
 https://github.com/AzureZzz/algorithm-theory/blob/master/test2/Skyline.docx
 
+or
+
+
+
 
 
 ### 2.Data
