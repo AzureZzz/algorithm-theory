@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
-// #include <sys/time.h>	//Linux System
-#include <windows.h> //Windows System
+#include <sys/time.h>	//Linux System
+// #include <windows.h> //Windows System
 using namespace std;
 
 class LargeNumberString
@@ -139,50 +139,16 @@ public:
 	}
 
 	// Linux
-	// void test(int n, int tag = 0)
-	// {
-	// 	string x, y, res;
-
-	// 	x = getRandomLargeNumber(n);
-	// 	y = getRandomLargeNumber(n);
-	// 	struct timeval start, end;
-
-	// 	//计时开始
-	// 	gettimeofday(&start, NULL);
-	// 	//执行程序
-	// 	switch (tag)
-	// 	{
-	// 	case 0:
-	// 		res = multiply(x, y);
-	// 		break;
-	// 	case 1:
-	// 		res = DACMultiply(x, y);
-	// 		break;
-	// 	case 2:
-	// 		res = ImproveDACMultiply(x, y);
-	// 		break;
-	// 	}
-	// 	//计时结束
-	// 	gettimeofday(&end, NULL);
-	// 	cout << "n=" << n << ": " << getUsedTimeMs(start, end) << "ms" << endl;
-	// }
-
-	//Windows
-	void test(int n, int tag)
+	void test(int n, int tag = 0)
 	{
 		string x, y, res;
+
 		x = getRandomLargeNumber(n);
 		y = getRandomLargeNumber(n);
-
-		LARGE_INTEGER litmp;
-		LONGLONG start, end;
-		double dfFreq;
-		QueryPerformanceFrequency(&litmp);
-		dfFreq = (double)litmp.QuadPart;
+		struct timeval start, end;
 
 		//计时开始
-		QueryPerformanceCounter(&litmp);
-		start = litmp.QuadPart;
+		gettimeofday(&start, NULL);
 		//执行程序
 		switch (tag)
 		{
@@ -197,10 +163,44 @@ public:
 			break;
 		}
 		//计时结束
-		QueryPerformanceCounter(&litmp);
-		end = litmp.QuadPart;
-		cout << "n=" << n << ": " << getUsedTimeMs(start, end, dfFreq) << "ms" << endl;
+		gettimeofday(&end, NULL);
+		cout << "n=" << n << ": " << getUsedTimeMs(start, end) << "ms" << endl;
 	}
+
+	//Windows
+	// void test(int n, int tag)
+	// {
+	// 	string x, y, res;
+	// 	x = getRandomLargeNumber(n);
+	// 	y = getRandomLargeNumber(n);
+
+	// 	LARGE_INTEGER litmp;
+	// 	LONGLONG start, end;
+	// 	double dfFreq;
+	// 	QueryPerformanceFrequency(&litmp);
+	// 	dfFreq = (double)litmp.QuadPart;
+
+	// 	//计时开始
+	// 	QueryPerformanceCounter(&litmp);
+	// 	start = litmp.QuadPart;
+	// 	//执行程序
+	// 	switch (tag)
+	// 	{
+	// 	case 0:
+	// 		res = multiply(x, y);
+	// 		break;
+	// 	case 1:
+	// 		res = DACMultiply(x, y);
+	// 		break;
+	// 	case 2:
+	// 		res = ImproveDACMultiply(x, y);
+	// 		break;
+	// 	}
+	// 	//计时结束
+	// 	QueryPerformanceCounter(&litmp);
+	// 	end = litmp.QuadPart;
+	// 	cout << "n=" << n << ": " << getUsedTimeMs(start, end, dfFreq) << "ms" << endl;
+	// }
 
 	int compare(string x, string y)
 	{
@@ -221,15 +221,15 @@ public:
 
 private:
 	//Linux
-	// double getUsedTimeMs(struct timeval start, struct timeval end)
-	// {
-	// 	return ((end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec)) / 1000.0;
-	// }
-	// Windows
-	double getUsedTimeMs(LONGLONG start, LONGLONG end, double dfFreq)
+	double getUsedTimeMs(struct timeval start, struct timeval end)
 	{
-		return (double)(end - start) * 1000 / dfFreq;
+		return ((end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec)) / 1000.0;
 	}
+	// Windows
+	// double getUsedTimeMs(LONGLONG start, LONGLONG end, double dfFreq)
+	// {
+	// 	return (double)(end - start) * 1000 / dfFreq;
+	// }
 
 	string removeZeros(string str)
 	{

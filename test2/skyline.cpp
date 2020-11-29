@@ -11,21 +11,22 @@
 #include <sstream>
 #include <time.h>
 #include "BTree.h"
+#include <sys/time.h> //Linux System
 using namespace std;
 
 #define MAX_DNUM 5
-static int pnum = 8091179;		 	//顶点数目：8091179
-static vector<int> *key;		 	//关键词信息存储
-static vector<int> *graph;		 	//反向邻接表存储
-static vector<int> *origin_graph; 	//原始邻接表存储
-static vector<int> site;		 	//地点序号存储
-static map<int, int> pmap;		 	//地点坐标检索使用
-static int dnum = 0;			 	//查询关键词数目
+static int pnum = 8091179;		  //顶点数目：8091179
+static vector<int> *key;		  //关键词信息存储
+static vector<int> *graph;		  //反向邻接表存储
+static vector<int> *origin_graph; //原始邻接表存储
+static vector<int> site;		  //地点序号存储
+static map<int, int> pmap;		  //地点坐标检索使用
+static int dnum = 0;			  //查询关键词数目
 static int sitenum = 0;
-static int **gap;				  	//记录距离
-static int maxlayer = 0x3f3f3f3f; 	//记录支配情况下的最高层
+static int **gap;				  //记录距离
+static int maxlayer = 0x3f3f3f3f; //记录支配情况下的最高层
 static BTNode *Bt = NULL;
-static int *visited;				//
+static int *visited; //
 
 #pragma region read data
 
@@ -153,7 +154,7 @@ void show()
 	int num_edge = 0;
 	for (int i = 0; i < pnum; i++)
 	{
-		if((int)graph[i].size()>0)
+		if ((int)graph[i].size() > 0)
 		{
 			// cout << i << ": ";
 			for (int j = 0; j < (int)graph[i].size(); j++)
@@ -161,15 +162,14 @@ void show()
 				// cout << graph[i][j] << ",";
 				num_edge++;
 			}
-			// cout << endl;				
+			// cout << endl;
 		}
 	}
-	cout<<endl;
-	cout<<"Edges:"<<num_edge<<endl;
+	cout << endl;
+	cout << "Edges:" << num_edge << endl;
 }
 
 #pragma endregion
-
 
 void CreateBTree()
 {
@@ -297,6 +297,99 @@ void BFS_CalculateMinDistance(int start, int d)
 	queue<int> empty;
 	swap(empty, que);
 }
+
+#pragma region my improve
+void ImprovedBFSDistanceFirst(int start)
+{
+	int u, v;
+	queue<int> que;
+	int layer = 0, nodeNum = 1, nextnodeNum = 0;
+	que.push(start);
+	visited[start] = 1;
+	while (!que.empty())
+	{
+		u = que.front();
+		//cout << "u = " << u << endl;
+		que.pop();
+		if (pmap.find(u) != pmap.end())
+		{
+			int g = pmap[u];
+			if (gap[g][0] == -1 || gap[g][0] > layer)
+			{
+				gap[g][0] = layer;
+			}
+		}
+		for (int j = 0; j < (int)graph[u].size(); j++)
+		{
+			v = graph[u][j];
+			if (!visited[v]) //未访问过
+			{
+				que.push(v);
+				//cout << "v = " << v << endl;
+				visited[v] = 1;
+				nextnodeNum++;
+			}
+		}
+		nodeNum--; //每次循环输出一个点，即遍历当前层结点数-1
+		if (nodeNum == 0)
+		{
+			layer++;
+			nodeNum = nextnodeNum;
+			nextnodeNum = 0;
+		}
+	}
+	queue<int> empty;
+	swap(empty, que);
+}
+
+void ImprovedBFSDistanceNext(int start, int d)
+{
+	int u, v;
+	queue<int> que;
+	int layer = 0, nodeNum = 1, nextnodeNum = 0;
+	que.push(start);
+	visited[start] = 1;
+	while (!que.empty())
+	{
+		u = que.front();
+		//cout << "u = " << u << endl;
+		que.pop();
+		if (pmap.find(u) != pmap.end())
+		{
+			int g = pmap[u];
+			if (gap[g][d - 1] == -1) //该地点不包含上一个keyword，剪去
+			{
+				continue;
+			}
+			if (gap[g][d] == -1 || gap[g][d] > layer)
+			{
+				gap[g][d] = layer;
+			}
+		}
+		for (int j = 0; j < (int)graph[u].size(); j++)
+		{
+			v = graph[u][j];
+			if (!visited[v]) //未访问过
+			{
+				que.push(v);
+				//cout << "v = " << v << endl;
+				visited[v] = 1;
+				nextnodeNum++;
+			}
+		}
+		nodeNum--; //每次循环输出一个点，即遍历当前层结点数-1
+		if (nodeNum == 0)
+		{
+			layer++;
+			nodeNum = nextnodeNum;
+			nextnodeNum = 0;
+		}
+	}
+	queue<int> empty;
+	swap(empty, que);
+}
+#pragma endregion
+
 //返回值说明：1表示a<b，-1表示b<a，0表示两者没有支配关系
 int isGovern(int *a, int *b)
 {
@@ -406,8 +499,8 @@ void ShowList(noPoint *head)
 void SearchInBTree(int key, Findres &r)
 {
 	r = SearchBTree(Bt, key);
-	cout << "Flag = " << r.flag << endl;
-	cout << "sum of point = " << r.pt->key[r.i].sum << endl;
+	// cout << "Flag = " << r.flag << endl;
+	// cout << "sum of point = " << r.pt->key[r.i].sum << endl;
 	//cout << "no：" << endl;
 	//ShowList(r.pt->key[r.i].nolist);
 }
@@ -473,26 +566,39 @@ void ShowBNLResult()
 	}
 }
 
-void GetRunTime(FILE *file, int knum)
+double getUsedTimeMs(struct timeval start, struct timeval end)
 {
-	double starttime, endtime, deltatime;
+	return ((end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec)) / 1000.0;
+}
+
+void GetRunTime(int total,int knum)
+{
+	struct timeval start, end;
+	double deltatime;
 	vector<int> des;
+	vector<double> time1;
+	vector<double> time2;
 	dnum = knum;
-	int times = 50;
+	int times = total;
 	while (times--)
 	{
-		cout << "检索目标是(用空格隔开，回车表示开始进行检索)：" << endl;
-		for (int i = 0; i < knum; i++)
+		srand(time(NULL)); 
+		cout << "n="<<(times+1) <<" keywords：" << endl;
+		for (int i = 0; i < knum;)
 		{
 			int temp1 = rand() % pnum;
+			if (key[temp1].size() == 0)
+				continue;
 			int temp2 = rand() % key[temp1].size();
 			des.push_back(key[temp1][temp2]);
 			cout << des[i] << ",";
+			i++;
 		}
 		cout << endl;
+
 		Findres r;
-		starttime = clock();
-		cout << "****************正在检索****************" << endl;
+		gettimeofday(&start, NULL);
+		
 		for (int i = 0; i < dnum; i++)
 		{
 			memset(visited, 0, sizeof(int) * pnum);
@@ -501,39 +607,7 @@ void GetRunTime(FILE *file, int knum)
 			while (p != NULL)
 			{
 				BFS_CalculateMinDistance(p->no, i);
-				//cout<<p->no<<endl;
 				p = p->next;
-			}
-		}
-		//只有一个搜索词，找出其中是p点的即为skyline，若无p点则要反向遍历
-		if (dnum == 1)
-		{
-			SearchInBTree(des[0], r);
-			noPoint *p = r.pt->key[r.i].nolist;
-			int no;
-			pkey res(r.pt->key[r.i].key);
-			while (p != NULL)
-			{
-				no = p->no;
-				if (pmap.find(no) != pmap.end())
-				{
-					res.insert_no(no);
-				}
-				p = p->next;
-			}
-			cout << "sum of P in res = " << res.sum << endl;
-			if (res.sum == 0)
-			{
-				p = r.pt->key[r.i].nolist;
-				while (p != NULL)
-				{
-					BFS_CalculateMinDistance(p->no, 0);
-					//cout<<p->no<<endl;
-					p = p->next;
-				}
-				BNL();
-				cout << "BNL result's size = " << BNLresult.size() << endl;
-				//ShowBNLResult();
 			}
 		}
 		if (dnum > 1)
@@ -542,20 +616,73 @@ void GetRunTime(FILE *file, int knum)
 			cout << "BNL result's size = " << BNLresult.size() << endl;
 			//ShowBNLResult();
 		}
-		endtime = clock();
-		deltatime = endtime - starttime;
-		fprintf(file, "%f\n", deltatime);
-		cout << "*********检索所花时间：" << deltatime << endl;
+		
+		gettimeofday(&end, NULL);
+		deltatime = getUsedTimeMs(start, end);
+		cout << "Query time：" << deltatime << "ms" << endl;
+		time1.push_back(deltatime);
+		BNLresult.clear();
+
+		gettimeofday(&start, NULL);
+
+		memset(visited, 0, sizeof(int) * pnum);
+		SearchInBTree(des[0], r);
+		noPoint *p = r.pt->key[r.i].nolist;
+		while (p != NULL)
+		{
+			ImprovedBFSDistanceFirst(p->no);
+			p = p->next;
+		}
+		for (int i = 1; i < dnum; i++)
+		{
+			memset(visited, 0, sizeof(int) * pnum);
+			SearchInBTree(des[i], r);
+			noPoint *p = r.pt->key[r.i].nolist;
+			while (p != NULL)
+			{
+				ImprovedBFSDistanceNext(p->no, i);
+				p = p->next;
+			}
+		}
+
+		if (dnum > 1)
+		{
+			BNL();
+			cout << "BNL result's size = " << BNLresult.size() << endl;
+			//ShowBNLResult();
+		}
+		
+		gettimeofday(&end, NULL);
+		deltatime = getUsedTimeMs(start, end);
+		cout << "Improved query time：" << deltatime << "ms" << endl;
+		time2.push_back(deltatime);
 		BNLresult.clear();
 		des.clear();
 	}
-	fclose(file);
+	cout << "origin:" << endl;
+	double sum = 0;
+	for (int i = 0; i < time1.size(); i++)
+	{
+		cout << time1[i] << ",";
+		sum += time1[i];
+	}
+	cout << endl;
+	cout << sum / time1.size() << endl;
+	sum = 0;
+	cout << "Improved:" << endl;
+	for (int i = 0; i < time2.size(); i++)
+	{
+		cout << time2[i] << ",";
+		sum += time2[i];
+	}
+	cout << endl;
+	cout << sum / time2.size() << endl;
 }
-
-
 
 int main()
 {
+	struct timeval start, end;
+
 	string timefile = "rumtime.txt";
 	FILE *file;
 	file = fopen(timefile.c_str(), "a+");
@@ -565,8 +692,8 @@ int main()
 		exit(-1);
 	}
 
-	string path_keyword = "../data/Yago_small/node_keywords.txt";
-	string path_graph = "../data/Yago_small/edge.txt";
+	string path_keyword = "../data/Yago/node_keywords.txt";
+	string path_graph = "../data/Yago/edge.txt";
 	string path_site = "../data/placeid2coordYagoVB.txt";
 	readInit();
 	readKeyword(path_keyword);
@@ -582,21 +709,22 @@ int main()
 		}
 		//cout << gap[i][0] << endl;
 	}
-	cout << "顶点数目是：" << sitenum << endl;
-	cout << "**********************************" << endl;
-	double s1 = clock();
-	BFS_CreateBTree();
-	double s2 = clock();
-	double d1 = s2 - s1;
-	cout << "*********建立B树所花时间：" << d1 << endl;
-	//开启随机查询
-	//GetRunTime(file, 3);
+	cout << "Site number：" << sitenum << endl;
 
-	double starttime, endtime, deltatime;
+	gettimeofday(&start, NULL);
+	BFS_CreateBTree();
+	gettimeofday(&end, NULL);
+	double d1 = getUsedTimeMs(start, end);
+	cout << "Building B-tree time：" << d1 << "ms" << endl;
+	//开启随机查询
+	GetRunTime(10,4);
+	return 0;
+
+	double deltatime;
 	vector<int> des;
 	while (1)
 	{
-		cout << "是否继续检索：是请输入1，否请输入0" << endl;
+		cout << "continue? quit:0 improve:1 origin:2" << endl;
 		int flag;
 		cin >> flag;
 		getchar();
@@ -604,7 +732,7 @@ int main()
 		{
 			break;
 		}
-		cout << "请告诉你的检索目标是(用空格隔开，回车表示开始进行检索)：" << endl;
+		cout << "Input keywords：" << endl;
 		char tempstr[2048];
 		cin.getline(tempstr, 2048);
 		char seps[] = " ,";
@@ -619,17 +747,42 @@ int main()
 		}
 		dnum = des.size();
 		Findres r;
-		starttime = clock();
-		cout << "****************正在检索****************" << endl;
-		for (int i = 0; i < dnum; i++)
+		gettimeofday(&start, NULL);
+		cout << "Querying..." << endl;
+		if (flag == 1)
 		{
 			memset(visited, 0, sizeof(int) * pnum);
-			SearchInBTree(des[i], r);
+			SearchInBTree(des[0], r);
 			noPoint *p = r.pt->key[r.i].nolist;
 			while (p != NULL)
 			{
-				BFS_CalculateMinDistance(p->no, i);
+				ImprovedBFSDistanceFirst(p->no);
 				p = p->next;
+			}
+			for (int i = 1; i < dnum; i++)
+			{
+				memset(visited, 0, sizeof(int) * pnum);
+				SearchInBTree(des[i], r);
+				noPoint *p = r.pt->key[r.i].nolist;
+				while (p != NULL)
+				{
+					ImprovedBFSDistanceNext(p->no, i);
+					p = p->next;
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < dnum; i++)
+			{
+				memset(visited, 0, sizeof(int) * pnum);
+				SearchInBTree(des[i], r);
+				noPoint *p = r.pt->key[r.i].nolist;
+				while (p != NULL)
+				{
+					BFS_CalculateMinDistance(p->no, i);
+					p = p->next;
+				}
 			}
 		}
 		//只有一个搜索词，找出其中是p点的即为skyline，若无p点则要反向遍历
@@ -666,11 +819,12 @@ int main()
 			BNL();
 			cout << "BNL result's size = " << BNLresult.size() << endl;
 		}
-		endtime = clock();
-		deltatime = endtime - starttime;
+		// deltatime = endtime - starttime;
+		gettimeofday(&end, NULL);
+		deltatime = getUsedTimeMs(start, end);
 		fprintf(file, "%f", deltatime);
-		cout << "*********检索所花时间：" << deltatime << endl;
-		ShowBNLResult();
+		cout << "Query used time：" << deltatime << "ms" << endl;
+		// ShowBNLResult();
 		BNLresult.clear();
 		des.clear();
 	}

@@ -13,7 +13,7 @@
 #include "BTree.h"
 using namespace std;
 
-#define MAX_DNUM 5
+#define MAX_DNUM 5				 //查询keywords的最大数量
 static int pnum = 8091179;		 //8091179,24;			//点的数目
 static vector<int> *key;		 //关键词信息存储
 static vector<int> *graph;		 //反向邻接表存储
@@ -579,7 +579,7 @@ int main()
 	double d1 = s2 - s1;
 	cout << "*********建立B树所花时间：" << d1 << endl;
 	//开启随机查询
-	//GetRunTime(file, 3);
+	// GetRunTime(file, 3);
 
 	double starttime, endtime, deltatime;
 	vector<int> des;
@@ -653,6 +653,7 @@ int main()
 				cout << "BNL result's size = " << BNLresult.size() << endl;
 			}
 		}
+		
 		if (dnum > 1)
 		{
 			BNL();
