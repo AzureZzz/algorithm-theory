@@ -142,6 +142,26 @@ reference：https://www.cnblogs.com/lianzhilei/p/11250589.html
 
 
 
+**algorithm flow chart**:
+
+```flow
+st=>start: start
+build=>operation: read data and build graph
+input=>inputoutput: input keywords
+search=>operation: 1.search keyword
+cal=>operation: 2.calculate shortest distance
+select=>operation: 3.select SP
+output=>inputoutput: output SP
+e=>end: end
+
+st->build->input->search->cal->select->output->e
+
+```
+
+
+
+
+
 
 
 
