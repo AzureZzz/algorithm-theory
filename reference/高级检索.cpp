@@ -13,7 +13,7 @@
 #include "BTree.h"
 using namespace std;
 
-#define MAX_DNUM 5
+#define MAX_DNUM 5				 //查询keywords的最大数量
 static int pnum = 8091179;		 //8091179,24;			//点的数目
 static vector<int> *key;		 //关键词信息存储
 static vector<int> *graph;		 //反向邻接表存储
@@ -556,17 +556,7 @@ int main()
 	string keyfile = "../data/Yago/node_keywords.txt";
 	string graphfile = "../data/Yago/edge.txt";
 	string sitefile = "../data/placeid2coordYagoVB.txt";
-
-	/*
-	string keyfile = "B:/算法大作业/Yago_small/node_keywords.txt";
-	string graphfile = "B:/算法大作业/Yago_small/edge.txt";
-	string sitefile = "B:/算法大作业/数据/placeid2coordYagoVB.txt";
-	*/
-	/*
-	string keyfile = "B:/算法大作业/question1/node_kewords.txt";
-	string graphfile = "B:/算法大作业/question1/edge.txt";
-	string sitefile = "B:/算法大作业/question1/position.txt";
-	*/
+	
 	PreSet();
 	ReadKey(keyfile);
 	ReadGraph(graphfile);
@@ -589,7 +579,7 @@ int main()
 	double d1 = s2 - s1;
 	cout << "*********建立B树所花时间：" << d1 << endl;
 	//开启随机查询
-	//GetRunTime(file, 3);
+	// GetRunTime(file, 3);
 
 	double starttime, endtime, deltatime;
 	vector<int> des;
@@ -663,6 +653,7 @@ int main()
 				cout << "BNL result's size = " << BNLresult.size() << endl;
 			}
 		}
+		
 		if (dnum > 1)
 		{
 			BNL();

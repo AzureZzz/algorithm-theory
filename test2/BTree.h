@@ -72,15 +72,16 @@ typedef enum status{
 	OVERFLOW,
 	EMPTY
 }Status;
+
 #pragma region B树方法声明 
-//	初始化B树 
+//初始化B树 
 Status InitBTree(BTree &t)
 {
 	t=NULL;
 	return OK;
 }
 
-//	在结点p中查找关键词k的插入位置i
+//在结点p中查找关键词k的插入位置i
 int SearchBTNode(BTNode *p, keytype k)
 {
 	int i = 0;
@@ -88,7 +89,7 @@ int SearchBTNode(BTNode *p, keytype k)
 	return i;
 }
 
-//	在树t种查找关键词k，返回查找结果类型
+//在树t种查找关键词k，返回查找结果类型
 Findres SearchBTree(BTree t, keytype k)
 {
 	BTNode *p = t, *q = NULL;		//初始化结点p和结点q，p指向待查结点 
@@ -123,7 +124,7 @@ Findres SearchBTree(BTree t, keytype k)
 	return r;						//返回关键词k的位置（或者插入位置） 
 } 
 
-//	将关键词k和结点q分别插入到p->key[i+1]和p->ptr[i+1]中 
+//将关键词k和结点q分别插入到p->key[i+1]和p->ptr[i+1]中 
 void InsertBTNode(BTNode *&p, int i, keytype k, BTNode *q) 
 {
 	int j;
@@ -141,7 +142,7 @@ void InsertBTNode(BTNode *&p, int i, keytype k, BTNode *q)
 	p->keynum++;
 }
 
-//	将结点p分裂成2个结点，前一半保留，后一半移入结点q
+//将结点p分裂成2个结点，前一半保留，后一半移入结点q
 void SplitBTNode(BTNode *&p, BTNode *&q)
 {
 	int i;
@@ -166,7 +167,7 @@ void SplitBTNode(BTNode *&p, BTNode *&q)
 	p->keynum = s - 1;
 }
 
-//	生成新的根结点t，原p和q为子树指针 
+//生成新的根结点t，原p和q为子树指针 
 void NewRoot(BTNode *&t,keytype k,BTNode *p,BTNode *q)
 {
 	t = (BTNode *)malloc(sizeof(BTNode));		//分配空间
@@ -231,7 +232,7 @@ void InsertBTree(BTree &t,int i,keytype k, BTNode *p)
 	}
 }
 
-//	从p结点删除key[i]和它的孩子指针ptr[i] 
+//从p结点删除key[i]和它的孩子指针ptr[i] 
 void Remove(BTNode *p,int i)
 {
 	int j;
@@ -243,14 +244,13 @@ void Remove(BTNode *p,int i)
 	p->keynum--;
 }
 
-//	寻找替代值（右子树中的最小关键词）% 
+//寻找替代值（右子树中的最小关键词）% 
 void Substitution(BTNode *p,int i)
 {
 	BTNode *q;
 	for(q = p->ptr[i]; q->ptr[0]!=NULL;q=q->ptr[0]);
 	p->key[i] = q->key[1];		//复制关键词 
 }
-
 
 //将双亲结点p中的最后一个关键词移入右结点q中 
 //并将左结点ap中的最后一个关键词移入双亲结点p中
@@ -298,7 +298,7 @@ void MoveLeft(BTNode *p,int i)
 	 
 }
 
-//双亲结点p，右结点q合并入左结点aq，
+//双亲结点p，右结点q合并入左结点aq
 //并调整双亲结点p中剩余关键字的位置 
 void Combine(BTNode *p,int i)
 {
@@ -480,7 +480,7 @@ void DestroyBTree(BTree &t)
 	t = NULL;
 } 
 
-//	初始化队列
+//初始化队列
 Status InitQueue(LinkList &L)
 {
 	//分配结点空间 
@@ -645,7 +645,6 @@ void Test1()
 	PrintBTree(t);
 	
 }
-
 
 void Test2()
 {
