@@ -2,6 +2,8 @@
 #include <string>
 // #include <sys/time.h>	//Linux System
 #include <windows.h> //Windows System
+#include <fstream>
+#include <time.h>
 using namespace std;
 
 class LargeNumberString
@@ -99,11 +101,11 @@ public:
 			res = res.substr(1, res.length());
 		return res;
 	}
-	
+
 	string DACMultiply(string x, string y)
 	{
 		int m = x.length(), n = y.length();
-		if (m <= 100 || n <= 100)
+		if (m <= 1 || n <= 1)
 			return multiply(x, y);
 		int c = min(m, n) / 2;
 		string A = x.substr(0, m - c), B = removeZeros(x.substr(m - c, m));
@@ -168,9 +170,18 @@ public:
 	// }
 
 	//Windows
-	void test(int n, int tag)
+	void test(int n, int tag, int repeat = 1)
 	{
+		string logfile = "./logs.txt";
+		FILE *file;
+		file = fopen(logfile.c_str(), "a+");
+		if (!file)
+		{
+			cout << "logfile open filed!" << endl;
+			exit(-1);
+		}
 		string x, y, res;
+
 		x = getRandomLargeNumber(n);
 		y = getRandomLargeNumber(n);
 
@@ -179,28 +190,141 @@ public:
 		double dfFreq;
 		QueryPerformanceFrequency(&litmp);
 		dfFreq = (double)litmp.QuadPart;
-
-		//计时开始
-		QueryPerformanceCounter(&litmp);
-		start = litmp.QuadPart;
-		//执行程序
-		switch (tag)
+		time_t t = time(0);
+		char tmp[64];
+		strftime(tmp, sizeof(tmp), "%Y/%m/%d %H:%M:%S", localtime(&t));
+		fprintf(file, "\n%s:(tag=%d, n=%d, repeat=%d)\n", tmp, tag, n, repeat);
+		double sum = 0.0;
+		while (repeat--)
 		{
-		case 0:
-			res = multiply(x, y);
-			break;
-		case 1:
-			res = DACMultiply(x, y);
-			break;
-		case 2:
-			res = ImproveDACMultiply(x, y);
-			break;
+			switch (tag)
+			{
+			case 0:
+				QueryPerformanceCounter(&litmp);
+				start = litmp.QuadPart;
+				res = multiply(x, y);
+				QueryPerformanceCounter(&litmp);
+				end = litmp.QuadPart;
+				break;
+			case 1:
+				QueryPerformanceCounter(&litmp);
+				start = litmp.QuadPart;
+				res = DACMultiply(x, y);
+				QueryPerformanceCounter(&litmp);
+				end = litmp.QuadPart;
+				break;
+			case 2:
+				QueryPerformanceCounter(&litmp);
+				start = litmp.QuadPart;
+				res = ImproveDACMultiply(x, y);
+				QueryPerformanceCounter(&litmp);
+				end = litmp.QuadPart;
+				break;
+			}
+			double time = getUsedTimeMs(start, end, dfFreq);
+			sum += time;
+			fprintf(file, "%lf ", time);
 		}
-		//计时结束
-		QueryPerformanceCounter(&litmp);
-		end = litmp.QuadPart;
-		cout << "n=" << n << ": " << getUsedTimeMs(start, end, dfFreq) << "ms" << endl;
+		fprintf(file, "\nsum:%lfms", sum);
+		fclose(file);
 	}
+
+	void test_(int tag, int maxlen, int stride)
+	{
+		string logfile[4] = {"./points_0.txt", "./points_1.txt", "./points_2.txt", "./points_3.txt"};
+		FILE *file;
+		file = fopen(logfile[3].c_str(), "w");
+		if (!file)
+		{
+			cout << "logfile open filed!" << endl;
+			exit(-1);
+		}
+		LARGE_INTEGER litmp;
+		LONGLONG start, end;
+		double dfFreq;
+		QueryPerformanceFrequency(&litmp);
+		dfFreq = (double)litmp.QuadPart;
+		time_t t = time(0);
+		char tmp[64];
+		strftime(tmp, sizeof(tmp), "%Y/%m/%d %H:%M:%S", localtime(&t));
+		fprintf(file, "%s:(tag=%d, maxlen=%d, stride=%d)\n", tmp, tag, maxlen, stride);
+		// fprintf(file, "len:\n");
+		for (int n = 10; n <= maxlen; n += stride)
+		{
+			fprintf(file, "%d ", n);
+		}
+		// fprintf(file, "\ntimes:\n");
+		fprintf(file, "\n");
+		string x, y, res;
+		for (int n = 10; n <= maxlen; n += stride)
+		{
+			x = getRandomLargeNumber(n);
+			y = getRandomLargeNumber(n);
+			switch (tag)
+			{
+			case 0:
+				QueryPerformanceCounter(&litmp);
+				start = litmp.QuadPart;
+				res = multiply(x, y);
+				QueryPerformanceCounter(&litmp);
+				end = litmp.QuadPart;
+				break;
+			case 1:
+				QueryPerformanceCounter(&litmp);
+				start = litmp.QuadPart;
+				res = DACMultiply(x, y);
+				QueryPerformanceCounter(&litmp);
+				end = litmp.QuadPart;
+				break;
+			case 2:
+				QueryPerformanceCounter(&litmp);
+				start = litmp.QuadPart;
+				res = ImproveDACMultiply(x, y);
+				QueryPerformanceCounter(&litmp);
+				end = litmp.QuadPart;
+				break;
+			}
+			double time = getUsedTimeMs(start, end, dfFreq);
+			cout << "n=" << n << ": " << time << "ms" << endl;
+			fprintf(file, "%lf ", time);
+		}
+		fclose(file);
+	}
+
+	//Windows
+	// void test(int n, int tag)
+	// {
+	// 	string x, y, res;
+	// 	x = getRandomLargeNumber(n);
+	// 	y = getRandomLargeNumber(n);
+
+	// 	LARGE_INTEGER litmp;
+	// 	LONGLONG start, end;
+	// 	double dfFreq;
+	// 	QueryPerformanceFrequency(&litmp);
+	// 	dfFreq = (double)litmp.QuadPart;
+
+	// 	//计时开始
+	// 	QueryPerformanceCounter(&litmp);
+	// 	start = litmp.QuadPart;
+	// 	//执行程序
+	// 	switch (tag)
+	// 	{
+	// 	case 0:
+	// 		res = multiply(x, y);
+	// 		break;
+	// 	case 1:
+	// 		res = DACMultiply(x, y);
+	// 		break;
+	// 	case 2:
+	// 		res = ImproveDACMultiply(x, y);
+	// 		break;
+	// 	}
+	// 	//计时结束
+	// 	QueryPerformanceCounter(&litmp);
+	// 	end = litmp.QuadPart;
+	// 	cout << "n=" << n << ": " << getUsedTimeMs(start, end, dfFreq) << "ms" << endl;
+	// }
 
 	int compare(string x, string y)
 	{
@@ -245,20 +369,7 @@ private:
 int main()
 {
 	LargeNumberString ln;
-	int maxlen = 100000;
-	for (int i = 10; i <= 1000; i *= 10)
-		ln.test(i, 0);
-	cout<<endl;
-	cout << "Vanilla:" << endl;
-	for (int i = 10; i <= maxlen; i *= 10)
-		ln.test(i, 0);
-	cout<<endl;
-	cout << "DAC:" << endl;
-	for (int i = 10; i <= maxlen; i *= 10)
-		ln.test(i, 1);
-	cout<<endl;
-	cout << "Improved DAC:" << endl;
-	for (int i = 10; i <= maxlen*10; i *= 10)
-		ln.test(i, 2);
+	ln.test(10,1,100);
+	// ln.test_(1, 10000, 100);
 	return 0;
 }
