@@ -5,6 +5,8 @@
 #include <fstream>
 #include <time.h>
 using namespace std;
+int arr[10000000];
+int threshold=100;
 
 class LargeNumberString
 {
@@ -84,28 +86,30 @@ public:
 		int lx = x.length(), ly = y.length();
 		string res(lx + ly, '0');
 		for (int i = ly - 1; i >= 0; i--)
-		{
-			int mulflag = 0, addflag = 0;
 			for (int j = lx - 1; j >= 0; j--)
+				arr[i + j + 1] += (y[i] - '0') * (x[j] - '0');
+
+		for (int i = res.length() - 1; i > 0; i--)
+		{
+			if (arr[i] > 9)
 			{
-				int t1 = (y[i] - '0') * (x[j] - '0') + mulflag;
-				mulflag = t1 / 10;
-				t1 = t1 % 10;
-				int t2 = res[i + j + 1] - '0' + t1 + addflag;
-				res[i + j + 1] = t2 % 10 + 48;
-				addflag = t2 / 10;
+				arr[i - 1] += arr[i] / 10;
+				res[i] = arr[i] % 10 + '0';
 			}
-			res[i] += mulflag + addflag;
+			else
+				res[i] = arr[i] + '0';
 		}
-		if (res[0] == '0')
+		if (arr[0] == 0)
 			res = res.substr(1, res.length());
+		else
+			res[0] = arr[0] + '0';
 		return res;
 	}
 
 	string DACMultiply(string x, string y)
 	{
 		int m = x.length(), n = y.length();
-		if (m <= 1 || n <= 1)
+		if (m <= threshold || n <= threshold)
 			return multiply(x, y);
 		int c = min(m, n) / 2;
 		string A = x.substr(0, m - c), B = removeZeros(x.substr(m - c, m));
@@ -123,7 +127,7 @@ public:
 	string ImproveDACMultiply(string x, string y)
 	{
 		int m = x.length(), n = y.length();
-		if (m <= 30 || n <= 30)
+		if (m <= 100 || n <= 100)
 			return multiply(x, y);
 		int c = min(m, n) / 2;
 		string A = x.substr(0, m - c), B = removeZeros(x.substr(m - c, m));
@@ -224,6 +228,7 @@ public:
 			double time = getUsedTimeMs(start, end, dfFreq);
 			sum += time;
 			fprintf(file, "%lf ", time);
+			cout << "n=" << n << ": " << time << "ms" << endl;
 		}
 		fprintf(file, "\nsum:%lfms", sum);
 		fclose(file);
@@ -231,7 +236,8 @@ public:
 
 	void test_(int tag, int maxlen, int stride)
 	{
-		string logfile[4] = {"./points_0.txt", "./points_1.txt", "./points_2.txt", "./points_3.txt"};
+		string logfile[7] = {"./points_0.txt", "./points_1.txt", "./points_2.txt", "./points_3.txt",
+							 "./points_4.txt", "./points_5.txt", "./points_6.txt"};
 		FILE *file;
 		file = fopen(logfile[3].c_str(), "w");
 		if (!file)
@@ -291,40 +297,49 @@ public:
 		fclose(file);
 	}
 
-	//Windows
-	// void test(int n, int tag)
-	// {
-	// 	string x, y, res;
-	// 	x = getRandomLargeNumber(n);
-	// 	y = getRandomLargeNumber(n);
-
-	// 	LARGE_INTEGER litmp;
-	// 	LONGLONG start, end;
-	// 	double dfFreq;
-	// 	QueryPerformanceFrequency(&litmp);
-	// 	dfFreq = (double)litmp.QuadPart;
-
-	// 	//计时开始
-	// 	QueryPerformanceCounter(&litmp);
-	// 	start = litmp.QuadPart;
-	// 	//执行程序
-	// 	switch (tag)
-	// 	{
-	// 	case 0:
-	// 		res = multiply(x, y);
-	// 		break;
-	// 	case 1:
-	// 		res = DACMultiply(x, y);
-	// 		break;
-	// 	case 2:
-	// 		res = ImproveDACMultiply(x, y);
-	// 		break;
-	// 	}
-	// 	//计时结束
-	// 	QueryPerformanceCounter(&litmp);
-	// 	end = litmp.QuadPart;
-	// 	cout << "n=" << n << ": " << getUsedTimeMs(start, end, dfFreq) << "ms" << endl;
-	// }
+	void test_threshold(int max, int stride, int n)
+	{
+		string logfile[1] = {"./points_6.txt"};
+		FILE *file;
+		file = fopen(logfile[0].c_str(), "w");
+		if (!file)
+		{
+			cout << "logfile open filed!" << endl;
+			exit(-1);
+		}
+		LARGE_INTEGER litmp;
+		LONGLONG start, end;
+		double dfFreq;
+		QueryPerformanceFrequency(&litmp);
+		dfFreq = (double)litmp.QuadPart;
+		time_t t = time(0);
+		char tmp[64];
+		strftime(tmp, sizeof(tmp), "%Y/%m/%d %H:%M:%S", localtime(&t));
+		fprintf(file, "%s:(max=%d, stride=%d)\n", tmp, max, stride);
+		// fprintf(file, "threshold:\n");
+		for (int i = 1; i <= max; i += stride)
+		{
+			fprintf(file, "%d ", i);
+		}
+		// fprintf(file, "\ntimes:\n");
+		fprintf(file, "\n");
+		string x, y, res;
+		for (int i = 1; i <= max; i += stride)
+		{
+			threshold = i;
+			x = getRandomLargeNumber(n);
+			y = getRandomLargeNumber(n);
+			QueryPerformanceCounter(&litmp);
+			start = litmp.QuadPart;
+			res = DACMultiply(x, y);
+			QueryPerformanceCounter(&litmp);
+			end = litmp.QuadPart;
+			double time = getUsedTimeMs(start, end, dfFreq);
+			cout << "threshold=" << i << ": " << time << "ms" << endl;
+			fprintf(file, "%lf ", time);
+		}
+		fclose(file);
+	}
 
 	int compare(string x, string y)
 	{
@@ -369,7 +384,37 @@ private:
 int main()
 {
 	LargeNumberString ln;
-	ln.test(10,1,100);
-	// ln.test_(1, 10000, 100);
+	// 测试三种方法各个长度的时间
+	// cout<<"Vanillia:"<<endl;
+	// for (int i = 10; i <= 10000; i *= 10)
+	// {
+	// 	ln.test(i, 0, 1);
+	// }
+	// cout<<"DAC:"<<endl;
+	// for (int i = 10; i <= 10000; i *= 10)
+	// {
+	// 	ln.test(i, 1, 1);
+	// }
+	// cout<<"Improved DAC:"<<endl;
+	// for (int i = 10; i <= 10000000; i *= 10)
+	// {
+	// 	ln.test(i, 2, 1);
+	// }
+
+	// 循环测试10,100位
+	// ln.test(10,0,1000);
+	// ln.test(10,1,1000);
+	// ln.test(10,2,1000);
+	// ln.test(100,0,100);
+	// ln.test(100,1,100);
+	// ln.test(100,2,100);
+
+	// 测试各算法的增长趋势
+	// ln.test_(0, 50000, 100);
+	// ln.test_(1, 50000, 100);
+	// ln.test_(2, 50000, 100);
+
+	// ln.test_threshold(1000, 5, 10000);
+	ln.test(10000000, 2, 1);
 	return 0;
 }
