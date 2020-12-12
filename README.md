@@ -51,7 +51,7 @@ Z=&AC*10^{2n}+(AD+BC)*10^n+BD\\
 $$
 By converting formula (1) to formula (2), one multiplication is eliminated.
 
-Algorithmic complexity：O(nlog(n))
+Algorithmic complexity：O(n^1.585)
 
 
 
