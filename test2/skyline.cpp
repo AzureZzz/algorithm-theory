@@ -14,22 +14,22 @@
 #include <sys/time.h> //Linux System
 using namespace std;
 
-#define MAX_DNUM 5
+#define MAX_DNUM 5				  //查询keyword最大数量
 static int pnum = 8091179;		  //顶点数目：8091179
-static vector<int> *key;		  //关键词信息存储
+static vector<int> *key;		  //keyword信息存储
 static vector<int> *graph;		  //反向邻接表存储
 static vector<int> *origin_graph; //原始邻接表存储
 static vector<int> site;		  //地点序号存储
 static map<int, int> pmap;		  //地点坐标检索使用
-static int dnum = 0;			  //查询关键词数目
-static int sitenum = 0;
-static int **gap;				  //记录距离
+static int dnum = 0;			  //查询keyword数目
+static int sitenum = 0;			  //site数目
+static int **gap;				  //语义距离矩阵：P点到各个keyword的距离
 static int maxlayer = 0x3f3f3f3f; //记录支配情况下的最高层
 static BTNode *Bt = NULL;
-static int *visited; //
+static int *visited; 			  //记录点是否被访问 0:未访问，1：已访问
+
 
 #pragma region read data
-
 void readInit()
 {
 	key = new vector<int>[pnum];
@@ -168,8 +168,22 @@ void show()
 	cout << endl;
 	cout << "Edges:" << num_edge << endl;
 }
-
 #pragma endregion
+
+void initGap()
+{
+	gap = new int *[sitenum];
+	for (int i = 0; i < sitenum; i++)
+	{
+		gap[i] = new int[MAX_DNUM];
+		for (int j = 0; j < MAX_DNUM; j++)
+		{
+			gap[i][j] = -1;
+		}
+		//cout << gap[i][0] << endl;
+	}
+	cout << "Site number：" << sitenum << endl;
+}
 
 void CreateBTree()
 {
@@ -683,15 +697,17 @@ int main()
 {
 	struct timeval start, end;
 
-	string timefile = "rumtime.txt";
+	//日志文件
+	string timefile = "logs.txt";
 	FILE *file;
 	file = fopen(timefile.c_str(), "a+");
 	if (!file)
 	{
-		cout << "timefile文件打开失败" << endl;
+		cout << "Open logs file failed!" << endl;
 		exit(-1);
 	}
 
+	//读取数据文件
 	string path_keyword = "../data/Yago/node_keywords.txt";
 	string path_graph = "../data/Yago/edge.txt";
 	string path_site = "../data/placeid2coordYagoVB.txt";
@@ -699,26 +715,19 @@ int main()
 	readKeyword(path_keyword);
 	readGraph(path_graph);
 	readSite(path_site);
-	gap = new int *[sitenum];
-	for (int i = 0; i < sitenum; i++)
-	{
-		gap[i] = new int[MAX_DNUM];
-		for (int j = 0; j < MAX_DNUM; j++)
-		{
-			gap[i][j] = -1;
-		}
-		//cout << gap[i][0] << endl;
-	}
-	cout << "Site number：" << sitenum << endl;
 
+	//初始化距离矩阵gap
+	initGap();
+
+	//创建B树
 	gettimeofday(&start, NULL);
 	BFS_CreateBTree();
 	gettimeofday(&end, NULL);
 	double d1 = getUsedTimeMs(start, end);
 	cout << "Building B-tree time：" << d1 << "ms" << endl;
 	//开启随机查询
-	GetRunTime(10,4);
-	return 0;
+	// GetRunTime(10,4);
+	// return 0;
 
 	double deltatime;
 	vector<int> des;
