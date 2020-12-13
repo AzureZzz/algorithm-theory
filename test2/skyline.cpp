@@ -10,7 +10,6 @@
 #include <map>
 #include <sstream>
 #include <time.h>
-#include "BTree.h"
 #include <sys/time.h> //Linux System
 using namespace std;
 
