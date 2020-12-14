@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstdio>
-#include <malloc.h>
 #include <cstdlib>
 #include <fstream>
 #include <vector>
@@ -8,9 +7,8 @@
 #include <cstring>
 #include <queue>
 #include <map>
-#include <sstream>
-#include <time.h>
-#include <sys/time.h> //Linux System
+#include <algorithm>
+#include <sys/time.h>   //Linux System
 using namespace std;
 
 #define MAX_QNUM 5                  //查询keyword最大数量
@@ -24,9 +22,14 @@ static map<int, vector<int>> kvmap; //关键字哈希表
 static int qnum = 0;                //查询keyword数目
 static int pnum = 0;                //site数目
 static int **gap;                   //语义距离矩阵：P点到各个keyword的距离
-static int maxlayer = 0x3f3f3f3f;   //记录支配情况下的最高层
 static int *visited;                //记录点是否被访问 0:未访问，1：已访问
 static vector<int> sps;             //skyline points result
+
+typedef struct node
+{
+    int v;
+    struct node *parent;
+}* Node;
 
 
 #pragma region read and create
@@ -43,17 +46,12 @@ void readKeyword(string filename)
     {
         char temp_str[10000] = {'\0'};
         if (fgets(temp_str, 10000, file) == NULL)
-        {
             break;
-        }
         char seps[] = ": ,\n";
-        char *token;
-        char *next_token;
+        char *token,*next_token;
         token = strtok(temp_str, seps);
         if (token == NULL)
-        {
             continue;
-        }
         int index = atoi(token), temp;
         token = strtok(NULL, seps);
         while (token != NULL)
@@ -61,9 +59,7 @@ void readKeyword(string filename)
             temp = atoi(token);
             key[index].push_back(temp);
             if (kvmap.find(temp) != kvmap.end())
-            {
                 kvmap[temp].push_back(index);
-            }
             else
             {
                 vector<int> v;
@@ -90,17 +86,12 @@ void readGraph(string filename)
     {
         char temp_str[10000] = {'\0'};
         if (fgets(temp_str, 10000, file) == NULL)
-        {
             break;
-        }
         char seps[] = ": ,\n";
-        char *token;
-        char *next_token;
+        char *token,*next_token;
         token = strtok(temp_str, seps);
         if (token == NULL)
-        {
             continue;
-        }
         u = atoi(token);
         token = strtok(NULL, seps);
         while (token != NULL)
@@ -124,23 +115,17 @@ void readSite(string filename)
         exit(-1);
     }
     fscanf(file, "%d#\n", &pnum);
-    int u;
-    int no = 0;
+    int u,no = 0;
     while (true)
     {
         char temp_str[10000] = {'\0'};
         if (fgets(temp_str, 10000, file) == NULL)
-        {
             break;
-        }
         char seps[] = ": ,\n";
-        char *token;
-        char *next_token;
+        char *token,*next_token;
         token = strtok(temp_str, seps);
         if (token == NULL)
-        {
             continue;
-        }
         u = atoi(token);
         pmap.insert(pair<int, int>(u, no++));
         ps.push_back(u);
@@ -169,21 +154,15 @@ void initGap()
     {
         gap[i] = new int[MAX_QNUM];
         for (int j = 0; j < MAX_QNUM; j++)
-        {
             gap[i][j] = -1;
-        }
     }
 }
 
 void clearGap()
 {
     for (int i = 0; i < pnum; i++)
-    {
         for (int j = 0; j < MAX_QNUM; j++)
-        {
             gap[i][j] = -1;
-        }
-    }
 }
 
 int govern(int *p, int *q)
@@ -217,7 +196,7 @@ void BFS(int start, int d)
 {
     int u, v;
     queue<int> qu;
-    int layer = 0, nodeNum = 1, nextnodeNum = 0;
+    int layer = 0, node_num = 1, nextnode_num = 0;
     qu.push(start);
     visited[start] = 1;
     while (!qu.empty())
@@ -230,22 +209,22 @@ void BFS(int start, int d)
             if (gap[g][d] == -1 || gap[g][d] > layer)
                 gap[g][d] = layer;
         }
-        for (int j = 0; j < (int)graph[u].size(); j++)
+        for (int j = 0; j < graph_T[u].size(); j++)
         {
-            v = graph[u][j];
+            v = graph_T[u][j];
             if (!visited[v])
             {
                 qu.push(v);
                 visited[v] = 1;
-                nextnodeNum++;
+                nextnode_num++;
             }
         }
-        nodeNum--;
-        if (nodeNum == 0)
+        node_num--;
+        if (node_num == 0)
         {
             layer++;
-            nodeNum = nextnodeNum;
-            nextnodeNum = 0;
+            node_num = nextnode_num;
+            nextnode_num = 0;
         }
     }
 }
@@ -332,14 +311,87 @@ void printResult()
             cout<<sps[i]<<" ";
     cout<<endl;
 }
-#pragma region use
+
+void printTree(int sp, vector<int> keywords)
+{
+    Node u;
+    int v;
+    queue<Node> qu;
+    int maxlayer = 0;
+    for (int i =0;i<MAX_QNUM;i++)
+        if(gap[sp][i] > maxlayer)
+            maxlayer = gap[sp][i];
+    vector<Node> *layers = new vector<Node>[maxlayer];
+	memset(visited, 0, sizeof(int) * pnum);
+
+    //构造一棵最大层为最远语义距离的正向BFS树
+    int layer = 0, node_num = 1, nextnode_num = 0;
+
+    Node root = new struct node;
+    root->parent = NULL;
+    root->v = sp;
+    qu.push(root);
+    visited[sp] = 1;
+    while (!qu.empty() && layer <=maxlayer)
+    {
+        u = qu.front();
+        qu.pop();
+        for (int j = 0; j < graph[u->v].size(); j++)
+        {   
+            v = graph[u->v][j];
+            if (!visited[v])
+            {
+                Node n = new struct node;
+                n->v = v;
+                n->parent = u;
+                layers[layer].push_back(n);
+                qu.push(n);
+                visited[v] = 1;
+                nextnode_num++;
+            }
+        }
+        node_num--;
+        if (node_num == 0)
+        {
+            layer++;
+            node_num = nextnode_num;
+            nextnode_num = 0;
+        }
+    }
+
+    vector<Node> *tree = new vector<Node>[maxlayer];
+    //从最大层开始剪去无用结点
+    for(int i=maxlayer-1;i>0;i--)
+    {
+        for(int j=0;j<MAX_QNUM;j++)
+        {
+            if((i+1)==gap[sp][j])
+            {
+                for(int k=0;k<layers[i].size();k++)
+                {
+                    vector<int> keys = key[layers[i][j]->v];
+                    if(find(keys.begin(),keys.end(), keywords[j]) != keys.begin())
+                    {
+                        tree[i].push_back(layers[i][j]);
+                        tree[i-1].push_back(layers[i][j]->parent);
+                    }
+                }  
+            }
+            for(int k =0;k<tree[i].size();k++)
+            {
+                tree[i-1].push_back(tree[i][k]->parent);
+            }
+        }
+    }
+}
+#pragma endregion
 
 int main()
 {
     int flag;
     double time;
     struct timeval start, end;
-    vector<int> keywords,sps;
+    vector<int> keywords;
 
     string keyword_file = "../data/Yago/node_keywords.txt";
     string graph_file = "../data/Yago/edge.txt";
