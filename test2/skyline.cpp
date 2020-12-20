@@ -8,7 +8,7 @@
 #include <queue>
 #include <map>
 #include <algorithm>
-#include <sys/time.h>   //Linux System
+#include <sys/time.h> //Linux System
 using namespace std;
 
 #define MAX_QNUM 5                  //查询keyword最大数量
@@ -29,8 +29,7 @@ typedef struct node
 {
     int v;
     struct node *parent;
-}* Node;
-
+} * Node;
 
 #pragma region read and create
 void readKeyword(string filename)
@@ -48,7 +47,7 @@ void readKeyword(string filename)
         if (fgets(temp_str, 10000, file) == NULL)
             break;
         char seps[] = ": ,\n";
-        char *token,*next_token;
+        char *token, *next_token;
         token = strtok(temp_str, seps);
         if (token == NULL)
             continue;
@@ -88,7 +87,7 @@ void readGraph(string filename)
         if (fgets(temp_str, 10000, file) == NULL)
             break;
         char seps[] = ": ,\n";
-        char *token,*next_token;
+        char *token, *next_token;
         token = strtok(temp_str, seps);
         if (token == NULL)
             continue;
@@ -115,14 +114,14 @@ void readSite(string filename)
         exit(-1);
     }
     fscanf(file, "%d#\n", &pnum);
-    int u,no = 0;
+    int u, no = 0;
     while (true)
     {
         char temp_str[10000] = {'\0'};
         if (fgets(temp_str, 10000, file) == NULL)
             break;
         char seps[] = ": ,\n";
-        char *token,*next_token;
+        char *token, *next_token;
         token = strtok(temp_str, seps);
         if (token == NULL)
             continue;
@@ -232,26 +231,26 @@ void BFS(int start, int d)
 void search()
 {
     sps.clear();
-	for(int i =0;i<pnum;i++)
+    for (int i = 0; i < pnum; i++)
     {
-        if(!assessible(gap[i]))
+        if (!assessible(gap[i]))
             continue;
         bool isSP = true;
         for (vector<int>::iterator it = sps.begin(); it != sps.end();)
-		{
-			int flag = govern(gap[i], gap[*it]);
-			if (flag == -1)
-				it = sps.erase(it);
-			else if (flag == 1)
-			{
-				isSP = false;
-				break;
-			}
-			else
-				it++;
-		}
-		if (isSP)
-			sps.push_back(i);
+        {
+            int flag = govern(gap[i], gap[*it]);
+            if (flag == -1)
+                it = sps.erase(it);
+            else if (flag == 1)
+            {
+                isSP = false;
+                break;
+            }
+            else
+                it++;
+        }
+        if (isSP)
+            sps.push_back(i);
     }
 }
 #pragma endregion
@@ -285,31 +284,31 @@ double query(vector<int> keywords)
 {
     struct timeval start, end;
     vector<int> starts;
-    int count=0;
+    int count = 0;
     gettimeofday(&start, NULL);
     clearGap();
-    for(int i=0;i<qnum;i++)
+    for (int i = 0; i < qnum; i++)
     {
         starts = kvmap[keywords[i]];
-        for(int j=0;j<starts.size();j++)
+        for (int j = 0; j < starts.size(); j++)
         {
             count++;
-            BFS(starts[j],i);
+            BFS(starts[j], i);
         }
     }
     search();
     gettimeofday(&end, NULL);
-    cout<<"count:"<<count<<endl;
-    return getUsedTimeMs(start,end);
+    cout << "count:" << count << endl;
+    return getUsedTimeMs(start, end);
 }
 
 void printResult()
 {
-    cout<<"skyline point number:"<<sps.size()<<endl;
-    if(sps.size()<=10)
-        for(int i=0;i<sps.size();i++)
-            cout<<sps[i]<<" ";
-    cout<<endl;
+    cout << "skyline point number:" << sps.size() << endl;
+    if (sps.size() <= 10)
+        for (int i = 0; i < sps.size(); i++)
+            cout << sps[i] << " ";
+    cout << endl;
 }
 
 void printTree(int sp, vector<int> keywords)
@@ -318,11 +317,11 @@ void printTree(int sp, vector<int> keywords)
     int v;
     queue<Node> qu;
     int maxlayer = 0;
-    for (int i =0;i<MAX_QNUM;i++)
-        if(gap[sp][i] > maxlayer)
+    for (int i = 0; i < MAX_QNUM; i++)
+        if (gap[sp][i] > maxlayer)
             maxlayer = gap[sp][i];
     vector<Node> *layers = new vector<Node>[maxlayer];
-	memset(visited, 0, sizeof(int) * pnum);
+    memset(visited, 0, sizeof(int) * pnum);
 
     //构造一棵最大层为最远语义距离的正向BFS树
     int layer = 0, node_num = 1, nextnode_num = 0;
@@ -332,12 +331,12 @@ void printTree(int sp, vector<int> keywords)
     root->v = sp;
     qu.push(root);
     visited[sp] = 1;
-    while (!qu.empty() && layer <=maxlayer)
+    while (!qu.empty() && layer <= maxlayer)
     {
         u = qu.front();
         qu.pop();
         for (int j = 0; j < graph[u->v].size(); j++)
-        {   
+        {
             v = graph[u->v][j];
             if (!visited[v])
             {
@@ -361,25 +360,39 @@ void printTree(int sp, vector<int> keywords)
 
     vector<Node> *tree = new vector<Node>[maxlayer];
     //从最大层开始剪去无用结点
-    for(int i=maxlayer-1;i>0;i--)
+    for (int i = maxlayer - 1; i > 0; i--)
     {
-        for(int j=0;j<MAX_QNUM;j++)
+        for (int j = 0; j < MAX_QNUM; j++)
         {
-            if((i+1)==gap[sp][j])
+            if ((i + 1) == gap[sp][j])
             {
-                for(int k=0;k<layers[i].size();k++)
+                for (int k = 0; k < layers[i].size(); k++)
                 {
-                    vector<int> keys = key[layers[i][j]->v];
-                    if(find(keys.begin(),keys.end(), keywords[j]) != keys.begin())
+                    vector<int> keys = key[layers[i][k]->v];
+                    if (find(keys.begin(), keys.end(), keywords[j]) != keys.begin())
                     {
-                        tree[i].push_back(layers[i][j]);
-                        tree[i-1].push_back(layers[i][j]->parent);
+                        tree[i].push_back(layers[i][k]);
+                        tree[i - 1].push_back(layers[i][k]->parent);
                     }
-                }  
+                }
             }
-            for(int k =0;k<tree[i].size();k++)
+            for (int k = 0; k < tree[i].size(); k++)
             {
-                tree[i-1].push_back(tree[i][k]->parent);
+                tree[i - 1].push_back(tree[i][k]->parent);
+            }
+        }
+    }
+    for (int j = 0; j < MAX_QNUM; j++)
+    {
+        if (gap[sp][j] == 1)
+        {
+            for (int k = 0; k < layers[0].size(); k++)
+            {
+                vector<int> keys = key[layers[0][j]->v];
+                if (find(keys.begin(), keys.end(), keywords[j]) != keys.begin())
+                {
+                    tree[0].push_back(layers[0][j]);
+                }
             }
         }
     }
@@ -405,18 +418,18 @@ int main()
     cout << "Read and create time：" << d1 << "ms" << endl;
 
     initGap();
-    while(true)
+    while (true)
     {
         cout << "continue? quit:0 query:1" << endl;
-		cin >> flag;
-		getchar();
-		if (!flag)
-			break;
-		cout << "Input keywords：" << endl;
+        cin >> flag;
+        getchar();
+        if (!flag)
+            break;
+        cout << "Input keywords：" << endl;
         keywords = inputKeywords();
         time = query(keywords);
         printResult();
-        cout<<"query time:"<<time<<endl;
+        cout << "query time:" << time << endl;
     }
     //test: 8787951,10321429,11375631
     return 0;
