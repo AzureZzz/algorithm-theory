@@ -12,7 +12,7 @@
 using namespace std;
 
 #define MAX_QNUM 5                  //查询keyword最大数量
-static int allnum = 8091179;        //顶点数目：8091179
+int allnum = 24;                    //顶点数目：8091179 or 24
 static vector<int> *key;            //keyword信息
 static vector<int> *graph_T;        //反向邻接表
 static vector<int> *graph;          //正向邻接表
@@ -31,7 +31,39 @@ typedef struct node
     struct node *parent;
 } * Node;
 
+double getUsedTimeMs(struct timeval start, struct timeval end)
+{
+    return ((end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec)) / 1000.0;
+}
+
 #pragma region read and create
+string *getFilePaths(int tag)
+{
+    string *file_paths = new string[3];
+    if (tag == 0)
+    {
+        file_paths[0] = "../data/example/node_keywords.txt";
+        file_paths[1] = "../data/example/edge.txt";
+        file_paths[2] = "../data/example/placeid.txt";
+        allnum = 24;
+    }
+    else if (tag == 1)
+    {
+        file_paths[0] = "../data/Yago_small/node_keywords.txt";
+        file_paths[1] = "../data/Yago_small/edge.txt";
+        file_paths[2] = "../data/placeid2coordYagoVB.txt";
+        allnum = 8091179;
+    }
+    else
+    {
+        file_paths[0] = "../data/Yago/node_keywords.txt";
+        file_paths[1] = "../data/Yago/edge.txt";
+        file_paths[2] = "../data/placeid2coordYagoVB.txt";
+        allnum = 8091179;
+    }
+    return file_paths;
+}
+
 void readKeyword(string filename)
 {
     FILE *file;
@@ -71,8 +103,10 @@ void readKeyword(string filename)
     fclose(file);
 }
 
-void readGraph(string filename)
+int readGraph(string filename)
 {
+
+    int edge_number = 0;
     FILE *file;
     file = fopen(filename.c_str(), "r");
     if (!file)
@@ -99,9 +133,11 @@ void readGraph(string filename)
             graph_T[v].push_back(u);
             graph[u].push_back(v);
             token = strtok(NULL, seps);
+            edge_number++;
         }
     }
     fclose(file);
+    return edge_number;
 }
 
 void readSite(string filename)
@@ -133,15 +169,32 @@ void readSite(string filename)
     fclose(file);
 }
 
-void initRead(string keyword_file, string graph_file, string site_file)
+double initRead(string keyword_file, string graph_file, string site_file, bool show_log = true)
 {
+    struct timeval start, end;
+    if (show_log)
+        cout << "Reading and creating..." << endl;
+
+    gettimeofday(&start, NULL);
+
     key = new vector<int>[allnum];
     graph_T = new vector<int>[allnum];
     graph = new vector<int>[allnum];
     visited = new int[allnum];
     readKeyword(keyword_file);
-    readGraph(graph_file);
+    int edge_number = readGraph(graph_file);
     readSite(site_file);
+
+    gettimeofday(&end, NULL);
+    if (show_log)
+    {
+        cout << "point number" << allnum << endl;
+        cout << "site number:" << pnum << endl;
+        cout << "edge number:" << edge_number << endl;
+        cout << "keyword number:" << kvmap.size() << endl;
+    }
+    cout << "" << endl;
+    return getUsedTimeMs(start, end);
 }
 #pragma endregion
 
@@ -256,11 +309,6 @@ void search()
 #pragma endregion
 
 #pragma region use and test
-double getUsedTimeMs(struct timeval start, struct timeval end)
-{
-    return ((end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec)) / 1000.0;
-}
-
 vector<int> inputKeywords()
 {
     vector<int> keywords;
@@ -403,19 +451,11 @@ int main()
 {
     int flag;
     double time;
-    struct timeval start, end;
     vector<int> keywords;
+    string *file_paths = getFilePaths(0);
 
-    string keyword_file = "../data/Yago/node_keywords.txt";
-    string graph_file = "../data/Yago/edge.txt";
-    string site_file = "../data/placeid2coordYagoVB.txt";
-
-    cout << "Reading and creating..." << endl;
-    gettimeofday(&start, NULL);
-    initRead(keyword_file, graph_file, site_file);
-    gettimeofday(&end, NULL);
-    double d1 = getUsedTimeMs(start, end);
-    cout << "Read and create time：" << d1 << "ms" << endl;
+    time = initRead(file_paths[0], file_paths[1], file_paths[2]);
+    cout << "Read and create time：" << time << "ms" << endl;
 
     initGap();
     while (true)
