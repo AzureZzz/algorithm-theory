@@ -8,11 +8,13 @@
 #include <queue>
 #include <map>
 #include <algorithm>
+#include <unistd.h>
 #include <sys/time.h> //Linux System
 using namespace std;
 
+static int DATA = 2;                //0:example 1:Yago_small 2:Yago
 #define MAX_QNUM 5                  //查询keyword最大数量
-int allnum = 24;                    //顶点数目：8091179 or 24
+static int allnum = 8091179;        //顶点数目：8091179 or 24
 static vector<int> *key;            //keyword信息
 static vector<int> *graph_T;        //反向邻接表
 static vector<int> *graph;          //正向邻接表
@@ -25,16 +27,30 @@ static int **gap;                   //语义距离矩阵：P点到各个keyword�
 static int *visited;                //记录点是否被访问 0:未访问，1：已访问
 static vector<int> sps;             //skyline points result
 
+static vector<double> times; //记录多次测试时间
+vector<int> keywords;        //查询关键字集合
+
 typedef struct node
 {
     int v;
     struct node *parent;
 } * Node;
 
+#pragma region common
 double getUsedTimeMs(struct timeval start, struct timeval end)
 {
     return ((end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec)) / 1000.0;
 }
+
+void printVectorInt(vector<int> v)
+{
+    for (int i = 0; i < v.size(); i++)
+    {
+        cout << v[i] << ' ';
+    }
+    cout << endl;
+}
+#pragma endregion
 
 #pragma region read and create
 string *getFilePaths(int tag)
@@ -188,12 +204,11 @@ double initRead(string keyword_file, string graph_file, string site_file, bool s
     gettimeofday(&end, NULL);
     if (show_log)
     {
-        cout << "point number" << allnum << endl;
-        cout << "site number:" << pnum << endl;
-        cout << "edge number:" << edge_number << endl;
-        cout << "keyword number:" << kvmap.size() << endl;
+        cout << "Point number:" << allnum << endl;
+        cout << "Site number:" << pnum << endl;
+        cout << "Edge number:" << edge_number << endl;
+        cout << "Keyword number:" << kvmap.size() << endl;
     }
-    cout << "" << endl;
     return getUsedTimeMs(start, end);
 }
 #pragma endregion
@@ -281,7 +296,7 @@ void BFS(int start, int d)
     }
 }
 
-void search()
+void BNL()
 {
     sps.clear();
     for (int i = 0; i < pnum; i++)
@@ -309,9 +324,11 @@ void search()
 #pragma endregion
 
 #pragma region use and test
-vector<int> inputKeywords()
+//手动输入keyword
+void inputKeywords()
 {
-    vector<int> keywords;
+    cout << "Input keywords：" << endl;
+    keywords.clear();
     char tempstr[2048];
     cin.getline(tempstr, 2048);
     char seps[] = " ,";
@@ -325,10 +342,28 @@ vector<int> inputKeywords()
         token = strtok(NULL, seps);
     }
     qnum = keywords.size();
-    return keywords;
 }
 
-double query(vector<int> keywords)
+//随机获得n个keyword
+void randomKeywords(int n)
+{
+    keywords.clear();
+    srand(time(NULL));
+    for (int i = 0; i < n;)
+    {
+        int t1 = rand() % allnum;
+        if (key[t1].size() > 0)
+        {
+            int t2 = rand() % key[t1].size();
+            keywords.push_back(key[t1][t2]);
+            i++;
+        }
+    }
+    qnum = keywords.size();
+}
+
+//skyline查询
+double query()
 {
     struct timeval start, end;
     vector<int> starts;
@@ -337,6 +372,7 @@ double query(vector<int> keywords)
     clearGap();
     for (int i = 0; i < qnum; i++)
     {
+        memset(visited, 0, sizeof(int) * allnum);
         starts = kvmap[keywords[i]];
         for (int j = 0; j < starts.size(); j++)
         {
@@ -344,55 +380,41 @@ double query(vector<int> keywords)
             BFS(starts[j], i);
         }
     }
-    search();
+    BNL();
     gettimeofday(&end, NULL);
-    cout << "count:" << count << endl;
+    // cout << "count:" << count << endl;
     return getUsedTimeMs(start, end);
 }
 
-void printResult()
+//获得sp点的语义树结点
+vector<int> getTp(int sp)
 {
-    cout << "skyline point number:" << sps.size() << endl;
-    if (sps.size() <= 10)
-        for (int i = 0; i < sps.size(); i++)
-            cout << sps[i] << " ";
-    cout << endl;
-}
-
-void printTree(int sp, vector<int> keywords)
-{
-    Node u;
-    int v;
-    queue<Node> qu;
-    int maxlayer = 0;
-    for (int i = 0; i < MAX_QNUM; i++)
-        if (gap[sp][i] > maxlayer)
-            maxlayer = gap[sp][i];
-    vector<Node> *layers = new vector<Node>[maxlayer];
-    memset(visited, 0, sizeof(int) * pnum);
-
-    //构造一棵最大层为最远语义距离的正向BFS树
+    memset(visited, 0, sizeof(int) * allnum);
+    int c, v;
     int layer = 0, node_num = 1, nextnode_num = 0;
-
-    Node root = new struct node;
-    root->parent = NULL;
-    root->v = sp;
-    qu.push(root);
-    visited[sp] = 1;
-    while (!qu.empty() && layer <= maxlayer)
+    vector<int> c_index;
+    for (int i = 0; i < keywords.size(); i++)
+        if (gap[sp][i] == 1)
+            c_index.push_back(i);
+    vector<int> Tp;
+    Tp.push_back(sp);
+    queue<int> qu;
+    qu.push(sp);
+    while (!qu.empty())
     {
-        u = qu.front();
+        c = qu.front();
         qu.pop();
-        for (int j = 0; j < graph[u->v].size(); j++)
+        for (int i = 0; i < graph[c].size(); i++)
         {
-            v = graph[u->v][j];
+            v = graph[c][i];
+            for (int j = 0; j < c_index.size(); j++)
+                //遍历该层所含的kewords,如果v点中包含该关键字则v加入Tp中
+                if (find(key[v].begin(), key[v].end(), keywords[c_index[j]]) != key[v].end())
+                    if (find(Tp.begin(), Tp.end(), v) == Tp.end())
+                        Tp.push_back(v);
             if (!visited[v])
             {
-                Node n = new struct node;
-                n->v = v;
-                n->parent = u;
-                layers[layer].push_back(n);
-                qu.push(n);
+                qu.push(v);
                 visited[v] = 1;
                 nextnode_num++;
             }
@@ -401,76 +423,188 @@ void printTree(int sp, vector<int> keywords)
         if (node_num == 0)
         {
             layer++;
+            c_index.clear();
+            for (int i = 0; i < keywords.size(); i++)
+                if (gap[sp][i] == layer + 1) //如果距离某个关键字的距离等于当前层,则该层存在包含该关键字的点
+                    c_index.push_back(i);    //记录该层所含关键字在keywords中的索引
             node_num = nextnode_num;
             nextnode_num = 0;
         }
     }
-
-    vector<Node> *tree = new vector<Node>[maxlayer];
-    //从最大层开始剪去无用结点
-    for (int i = maxlayer - 1; i > 0; i--)
-    {
-        for (int j = 0; j < MAX_QNUM; j++)
-        {
-            if ((i + 1) == gap[sp][j])
-            {
-                for (int k = 0; k < layers[i].size(); k++)
-                {
-                    vector<int> keys = key[layers[i][k]->v];
-                    if (find(keys.begin(), keys.end(), keywords[j]) != keys.begin())
-                    {
-                        tree[i].push_back(layers[i][k]);
-                        tree[i - 1].push_back(layers[i][k]->parent);
-                    }
-                }
-            }
-            for (int k = 0; k < tree[i].size(); k++)
-            {
-                tree[i - 1].push_back(tree[i][k]->parent);
-            }
-        }
-    }
-    for (int j = 0; j < MAX_QNUM; j++)
-    {
-        if (gap[sp][j] == 1)
-        {
-            for (int k = 0; k < layers[0].size(); k++)
-            {
-                vector<int> keys = key[layers[0][j]->v];
-                if (find(keys.begin(), keys.end(), keywords[j]) != keys.begin())
-                {
-                    tree[0].push_back(layers[0][j]);
-                }
-            }
-        }
-    }
+    return Tp;
 }
+
+//输出Tp
+void printTp(vector<int> Tp)
+{
+    cout << "Tp<" << Tp[0] << ">:" << endl;
+    cout << "<P_" << Tp[0] << ",(";
+    for (int i = 1; i < Tp.size() - 1; i++)
+    {
+        if (find(ps.begin(), ps.end(), Tp[i]) == ps.end())
+            cout << "V_" << Tp[i] << ",";
+        else
+            cout << "P_" << Tp[i] << ",";
+    }
+    if (Tp.size() - 1 >= 0)
+        if (find(ps.begin(), ps.end(), Tp[Tp.size() - 1]) == ps.end())
+            cout << "V_" << Tp[Tp.size() - 1] << ")>" << endl;
+        else
+            cout << "P_" << Tp[Tp.size() - 1] << ")>" << endl;
+    else
+        cout << ")>" << endl;
+
+    for (int i = 0; i < Tp.size(); i++)
+    {
+        if (find(ps.begin(), ps.end(), Tp[i]) == ps.end())
+            cout << " V_" << Tp[i] << ":";
+        else
+            cout << " P_" << Tp[i] << ":";
+        for (int j = 0; j < key[Tp[i]].size(); j++)
+            cout << key[Tp[i]][j] << " ";
+        cout << endl;
+    }
+    cout << endl;
+}
+
+//输出SP点
+void printResultSimple()
+{
+    cout << "sps:";
+    for (int i = 0; i < sps.size(); i++)
+    {
+        cout << sps[i] << " ";
+    }
+    cout << endl;
+}
+
+//输出详细结果
+void printResult()
+{
+    cout << endl;
+    cout << "#====< Query Result >====#" << endl;
+    cout << "SP number:" << sps.size() << endl;
+    printVectorInt(sps);
+    if (sps.size() <= 10000)
+    {
+        vector<int> Tp;
+        for (int i = 0; i < sps.size(); i++)
+        {
+            Tp = getTp(sps[i]);
+            printTp(Tp);
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
+//测试:随机产生n个keyword,循环loop次
+void test(int n, int loop, string logfile)
+{
+    times.clear();
+    FILE *file;
+    file = fopen(logfile.c_str(), "a");
+    if (!file)
+    {
+        cout << "logfile open filed!" << endl;
+        exit(-1);
+    }
+    time_t t = time(0);
+    char tmp[64];
+    strftime(tmp, sizeof(tmp), "%Y/%m/%d %H:%M:%S", localtime(&t));
+    fprintf(file, "=================%s:(keyword number=%d, loop=%d, data=%d)=================\n", tmp, n, loop, DATA);
+
+    double time;
+    for (int i = 0; i < loop;)
+    {
+        // inputKeywords();
+        randomKeywords(n);
+
+        time = query();
+
+        if (sps.size() > 1)
+        {
+            i++;
+            cout << "keywords:";
+            printVectorInt(keywords);
+            fprintf(file, "Keys:");
+            for (int j = 0; j < keywords.size(); j++)
+                fprintf(file, "%d ", keywords[j]);
+
+            fprintf(file, "\nSPs:");
+            for (int j = 0; j < sps.size(); j++)
+                fprintf(file, "%d ", sps[j]);
+            fprintf(file, "\ntime:%f\n", time);
+
+            printResultSimple();
+            times.push_back(time);
+            cout << "query time:" << time << endl;
+        }
+        // printResult();
+    }
+    fprintf(file, "times:");
+    for (int j = 0; j < times.size(); j++)
+        fprintf(file, "%.4f ", times[j]);
+    fprintf(file, "\n\n");
+    fclose(file);
+}
+
 #pragma endregion
 
 int main()
 {
-    int flag;
     double time;
-    vector<int> keywords;
-    string *file_paths = getFilePaths(0);
+    string logfiles[2] = {"./Yago_small_logs.txt", "./Yago_logs.txt"};
+    for (int i = 0; i < 2; i++)
+    {
+        DATA = i + 1;
+        string *file_paths = getFilePaths(DATA);
+        time = initRead(file_paths[0], file_paths[1], file_paths[2]);
+        cout << "Successfully! Read and create time：" << time << "ms" << endl;
+        int ns[5] = {1, 2, 3, 4, 5};
+        int loops[2] = {100, 50};
+        initGap();
+        for (int j = 0; j < 5; j++)
+        {
+            test(ns[j], loops[i], logfiles[i]);
+        }
+    }
+
+    return 0;
+
+    int flag;
+    int n, loop;
+
+    string *file_paths = getFilePaths(DATA);
 
     time = initRead(file_paths[0], file_paths[1], file_paths[2]);
-    cout << "Read and create time：" << time << "ms" << endl;
+    cout << "Successfully! Read and create time：" << time << "ms" << endl;
 
     initGap();
     while (true)
     {
-        cout << "continue? quit:0 query:1" << endl;
+        cout << "continue? quit:0 autotest:1 inputtest:2" << endl;
         cin >> flag;
         getchar();
         if (!flag)
             break;
-        cout << "Input keywords：" << endl;
-        keywords = inputKeywords();
-        time = query(keywords);
-        printResult();
-        cout << "query time:" << time << endl;
+        if (flag == 1)
+        {
+            cout << "input keywords number:";
+            cin >> n;
+            getchar();
+            cout << "input loop number:";
+            cin >> loop;
+            test(n, loop, "./result.txt");
+        }
+        else
+        {
+            inputKeywords();
+            time = query();
+            cout << "query time:" << time << endl;
+        }
     }
     //test: 8787951,10321429,11375631
+    //test: example:0302,1903
     return 0;
 }
